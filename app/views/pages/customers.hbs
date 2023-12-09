@@ -1,0 +1,40 @@
+<div class="d-flex mb-4 align-items-center">
+    <div class="fs-5 fw-bold me-5">Customers</div>
+    <div class="input-group w-25">
+        <label for="searchInput" class="input-group-text"><i class="ti ti-search"></i></label>
+        <input type="search" id="searchInput" class="form-control" placeholder="Search by phone number">
+    </div>
+    
+</div>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Phone number</th>
+            <th scope="col">Name</th>
+            <th scope="col">Address</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr style="cursor: pointer;" class="clickable-row" data-phone="phone">
+            <th scope="row">phone</th>
+            <td>name</td>
+            <td>address</td>
+        </tr>
+        {{#each customers}}
+        <tr style="cursor: pointer;" class="clickable-row" data-phone="{{phone}}">
+            <th scope="row">{{phone}}</th>
+            <td>{{name}}</td>
+            <td>{{address}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+<script>
+    $('.clickable-row').click(function() {
+        console.log('click')
+        const phone = $(this).data('phone');
+        window.location.href = `/customer/${phone}`;
+    });
+</script>

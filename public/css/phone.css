@@ -1,0 +1,14 @@
+.block-4 {
+	-webkit-box-shadow: 0 0 30px -10px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 0 30px -10px rgba(0, 0, 0, 0.1);
+	background: #fff;
+}
+
+.block-4 .block-4-text h3 {
+	font-size: 20px;
+	margin-bottom: 0;
+}
+
+.block-4 .block-4-text h3 a {
+	text-decoration: none;
+}

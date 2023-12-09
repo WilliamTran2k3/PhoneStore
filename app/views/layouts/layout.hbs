@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{title}}</title>
+	<link rel="shortcut icon" type="image/png" href="/images/logos/favicon.png" />
+	{{!-- Test --}}
+	<link rel="stylesheet" href="/css/styles.min.css" />
+	<link rel="stylesheet" href="/css/phone.css" />
+	<link rel="stylesheet" href="/css/root.css" /> 
+	{{!-- <link rel="stylesheet" href="/dist/assets/css/all.css"> --}}
+	<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script type="text/javascript" src="https://unpkg.com/@zxing/library@latest"></script>
+
+
+
+{{!-- Test --}}
+
+	<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+	
+	<script src="/dist/assets/js/all.js" defer></script>
+
+
+</head>
+<body>
+	<!--  Body Wrapper -->
+	<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+		{{> sidebar}}
+		<!--  Main wrapper -->
+		<div class="body-wrapper">
+			{{> header}}
+			<div class="container-fluid">
+				{{{ body }}}
+			</div>
+		</div>
+
+	</div>
+	
+	{{!-- <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+	
+	<script src="/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="/js/sidebarmenu.js"></script>
+	<script src="/js/app.min.js"></script>
+	<script src="/libs/apexcharts/dist/apexcharts.min.js"></script>
+	<script src="/libs/simplebar/dist/simplebar.js"></script> --}}
+	{{!-- <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+	
+	<script src="/dist/assets/js/all.js" defer></script> --}}
+</body>
+</html>

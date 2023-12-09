@@ -1,0 +1,502 @@
+<div class="row mb-5" style="max-height: 70vh">
+	<div class="col-lg-4 d-flex align-items-stretch">
+		<div class="card w-100">
+			<div class="card-body p-4">
+				<div class="mb-4">
+					<h5 class="card-title fw-semibold">Nhập tên điện thoại</h5>
+				</div>
+				<div class="mb-4">
+					<div class="input-group">
+						<input class="form-control border-end-0 border" type="text" placeholder="Tên điện thoại" id="search-input" name="keyword">
+						<span class="input-group-append">
+							<button class="btn btn-outline-secondary bg-white border-start-0 border-bottom-0 border ms-n4" type="button" id="dropdownToggle">
+								<i class="ti ti-search"></i>
+							</button>
+						</span>
+					</div>
+					<ul class="dropdown-menu" id="searchResults"></ul>
+				</div>
+
+				<hr class="mx-4 mb-4"/>
+
+				<div class="mb-4">
+					<h5 class="card-title fw-semibold">Nhập tên phụ kiện</h5>
+				</div>
+				<div class="mb-4">
+					<div class="input-group">
+						<input class="form-control border-end-0 border" type="text" placeholder="Tên phụ kiện" id="search-input-accessory" name="keyword-accessory">
+						<span class="input-group-append">
+							<button class="btn btn-outline-secondary bg-white border-start-0 border-bottom-0 border ms-n4" type="button" id="dropdownToggleAccessory">
+								<i class="ti ti-search"></i>
+							</button>
+						</span>
+					</div>
+					<ul class="dropdown-menu" id="searchResultsAccessory"></ul>
+				</div>
+
+				<hr class="mx-4 mb-4"/>
+
+				<div class="mb-4">
+					<h5 class="card-title fw-semibold">Nhập mã vạch</h5>
+				</div>
+				<input type="file" id="barcodeInput" class="form-control mb-2">
+				<img src="" id="selectedImage" class="w-100">
+			</div>
+		</div>
+	</div>
+	
+	<div class="col-lg-8 d-flex align-items-stretch overflow-auto">
+		<div class="card w-100">
+			<div class="card-body p-4">
+				<h5 class="card-title fw-semibold mb-4">Danh sách sản phẩm</h5>
+				<div class="table-responsive">
+					<table class="table text-nowrap mb-0 align-middle text-center">
+						<thead class="text-dark fs-4">
+							<tr>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">STT</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Tên sản phẩm</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Số lượng</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Đơn giá</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Thành tiền</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Thao tác</h6>
+							</th>
+							</tr>
+						</thead>
+						<tbody id="tbody-phone">
+							
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-lg-4 ms-auto">
+		<h3 class="text-primary">Tổng tiền: <span class="total-cart"></span></h3>
+		<button class="btn btn-primary btn-next">Thanh toán</button>
+	</div>
+</div>
+
+{{!-- <input type="file" id="barcodeInput">
+<img src="" alt="Ảnh được chọn" id="selectedImage">
+<div id="result"></div> --}}
+
+<script>
+	$(function() {
+		var dataSearch = [];
+		var dataSearchAccessory = [];
+		fetch(`/product/getAll`)
+			.then(res => res.json())
+			.then(data => {
+				dataSearch = data;
+				console.log(data);
+			})
+			.catch(err => console.log(err))
+			fetch(`/product/getAll?accessory=true`)
+			.then(res => res.json())
+			.then(data => {
+				dataSearchAccessory = data;
+				console.log(data);
+			})
+			.catch(err => console.log(err))
+		const phoneMap = JSON.parse(localStorage.getItem('phoneMap')) || {};
+		const cartLocal = JSON.parse(localStorage.getItem('cart')) || null;
+		if(cartLocal) {
+			updateUILocalStorage(cartLocal);
+		}
+		console.log(phoneMap);
+		$('#barcodeInput').click(function() {
+			$('#barcodeInput').val('');
+		});
+
+		$('#barcodeInput').change(async (event) => {
+			const file = event.target.files[0];
+			if (file) {
+				// Hiển thị hình ảnh đã chọn
+				const imageURL = URL.createObjectURL(file);
+				$('#selectedImage').attr('src', imageURL);
+
+				// Tạo một FileReader để đọc dữ liệu từ file hình ảnh
+				const reader = new FileReader();
+				reader.onload = async () => {
+					const imageSrc = reader.result;
+
+					// Tạo một Image để chứa hình ảnh cần giải mã
+					const img = new Image();
+					img.onload = async () => {
+						try {
+							// Tạo một ZXing BrowserBarcodeReader
+							const codeReader = new ZXing.BrowserBarcodeReader();
+
+							// Tạo BinaryBitmap từ hình ảnh
+							const luminanceSource = new ZXing.HTMLCanvasElementLuminanceSource(
+								document.createElement('canvas')
+							);
+							const binaryBitmap = new ZXing.BinaryBitmap(
+								new ZXing.HybridBinarizer(luminanceSource)
+							);
+
+							// Decode từ hình ảnh
+							const result = await codeReader.decodeFromImageElement(
+								img,
+								binaryBitmap
+							);
+
+							// Kết quả giải mã mã vạch
+							const id = result.text;
+							fetch(`/product/${id}`)
+							.then(res => {
+								if(res.status !== 200) {
+									Swal.fire({
+										title: "Lỗi mã vạch",
+										text: "Mã vạch không hợp lệ",
+										icon: "error"
+									});
+									return null;
+								} else {
+									return res.json();
+								}
+							})
+							.then(data => {
+								if(data !== null) {
+									console.log(data);
+									const key = data._id;
+									if(phoneMap.hasOwnProperty(key)) {
+										phoneMap[key] += 1;
+									} else {
+										phoneMap[key] = 1;
+									}
+									updateUI(data, phoneMap[key]);
+								}
+							})
+						} catch (error) {
+							console.error('Lỗi khi giải mã mã vạch:', error);
+						}
+					};
+					img.src = imageSrc;
+				};
+				reader.readAsDataURL(file);
+			}
+		});
+	
+		function updateUI(phone, quantity) {
+			console.log(phoneMap)
+			if($(`tr[data-tr-id='${phone._id}']`).length > 0) {
+				console.log('update has own')
+				$(`tr[data-tr-id='${phone._id}']`).find('input').val(quantity);
+				if(quantity > 1) {
+					$(`tr[data-tr-id='${phone._id}']`).find('.btn-minus').first().attr('disabled', false);
+				}
+				$(this).parent().siblings('input').val(quantity);
+				const price = parseInt(removeDotFormatting( $(`tr[data-tr-id='${phone._id}']`).find('.price-cart').text()));
+				const newPrice = quantity * price;
+				const newPriceText = newPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+				$(`tr[data-tr-id='${phone._id}']`).find('.total-price-cart').text(newPriceText);
+			} else {
+				const trLength = $('#tbody-phone tr').length;
+				var newIndex = 1;
+				if(trLength > 0) {
+					const currentIndex = $('#tbody-phone tr').last().find('td').first().text();
+					newIndex = parseInt(currentIndex) + 1;
+				}
+				const isDisabled = quantity === 1 ? 'disabled' : '';
+				let newTr = `<tr data-tr-id='${phone._id}'>
+							<td class="border-bottom-0"><h6 class="fw-semibold mb-0">${newIndex}</h6></td>
+							<td class="border-bottom-0 text-wrap">
+								<h6 class="fw-semibold mb-0">${phone.name}</h6>                        
+							</td>
+							<td class="border-bottom-0">
+								<div class="d-flex justify-content-center align-items-center">
+									<div class="input-group" style="width: 120px;">
+										<div class="input-group-prepend">
+											<button class="btn btn-outline-primary btn-minus" type="button" ${isDisabled}>&minus;</button>
+										</div>
+										<input type="text" class="form-control text-center p-0" value=${quantity}>
+										<div class="input-group-append">
+											<button class="btn btn-outline-primary btn-plus" type="button">&plus;</button>
+										</div>
+									</div>
+								</div>
+							</td>
+							<td class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 price-cart">${phone.retailPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h6>
+							</td>
+							<td class="border-bottom-0">
+								<div class="d-flex align-items-center justify-content-center">
+									<span class="total-price-cart text-white bg-primary rounded-3 fw-semibold px-3 py-2">${phone.retailPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
+								</div>
+							</td>
+							<td class="border-bottom-0">
+								<button class="btn btn-danger mb-0 fs-4 btn-remove-cart">x</button>
+							</td>
+							</tr>`;
+				$('#tbody-phone').append(newTr);
+			}
+			updateTotal();
+		}
+
+		function updateTotal() {
+			let total = 0;
+			$('#tbody-phone tr').each(function() {
+				const priceText = removeDotFormatting($(this).find('.total-price-cart').text());
+				total += parseInt(priceText);
+			});
+
+			$('.total-cart').text(total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+		}
+		$('#tbody-phone').on('click', '.btn-plus', function() {
+			
+			const id = $(this).closest('tr').data('tr-id');
+			if(phoneMap.hasOwnProperty(id)) {
+				phoneMap[id] += 1;
+			} else {
+				phoneMap[id] = 1;
+			}
+			console.log('plus', phoneMap);
+			const currentNum = parseInt($(this).parent().siblings('input').val()) + 1;
+			if(currentNum > 1) {
+				$(this).closest('.input-group').find('.btn-minus').first().attr('disabled', false);
+			}
+			$(this).parent().siblings('input').val(currentNum);
+			const price = parseInt(removeDotFormatting($(this).closest('tr').find('.price-cart').text()));
+			const newPrice = currentNum * price;
+			const newPriceText = newPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
+			$(this).closest('tr').find('.total-price-cart').text(newPriceText);
+			updateTotal();
+			updateLocalStorage();
+		})
+		$('#tbody-phone').on('click', '.btn-minus', function() {
+			const id = $(this).closest('tr').data('tr-id');
+			if(phoneMap.hasOwnProperty(id)) {
+				phoneMap[id] -= 1;
+			} 
+			console.log('minus', phoneMap);
+			const currentNum = parseInt($(this).parent().siblings('input').val()) - 1;
+			if(currentNum === 1) {
+				$(this).attr('disabled', true);
+			}
+			$(this).parent().siblings('input').val(currentNum);
+			const price = parseInt(removeDotFormatting($(this).closest('tr').find('.price-cart').text()));
+			const newPrice = currentNum * price;
+			const newPriceText = newPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
+			$(this).closest('tr').find('.total-price-cart').text(newPriceText);
+			updateTotal();
+			updateLocalStorage();
+		})
+
+		$('#tbody-phone').on('click', '.btn-remove-cart', function() {
+			const id = $(this).closest('tr').data('tr-id');
+			console.log(id);
+			delete phoneMap[id];
+			updateLocalStorage();
+			let cartText = JSON.parse(localStorage.getItem('cartText')) || [];
+			cartText = cartText.filter(cart => cart.id !== id);
+			localStorage.setItem('cartText', JSON.stringify(cartText));
+			$(this).closest('tr').remove();
+			updateTotal();
+		})
+
+		// SEARCH
+		$('#search-input').on('input', function() {
+			let query = $(this).val();
+			let results = performSearch(query, dataSearch);
+			// Hiển thị hoặc ẩn dropdown tùy thuộc vào kết quả tìm kiếm
+			let dropdown = $('#searchResults');
+			dropdown.empty(); // Xóa kết quả hiện tại trước khi hiển thị kết quả mới
+			if (results.length > 0) {
+				displayResults(results, dropdown, false); // Hiển thị kết quả
+				dropdown.show(); // Hiển thị dropdown
+			} else {
+				dropdown.hide(); // Ẩn dropdown nếu không có kết quả
+			}
+		});
+
+		$('#search-input-accessory').on('input', function() {
+			let query = $(this).val();
+			let results = performSearch(query, dataSearchAccessory);
+			// Hiển thị hoặc ẩn dropdown tùy thuộc vào kết quả tìm kiếm
+			let dropdown = $('#searchResultsAccessory');
+			dropdown.empty(); // Xóa kết quả hiện tại trước khi hiển thị kết quả mới
+			if (results.length > 0) {
+				displayResults(results,  dropdown, true); // Hiển thị kết quả
+				dropdown.show(); // Hiển thị dropdown
+			} else {
+				dropdown.hide(); // Ẩn dropdown nếu không có kết quả
+			}
+		});
+		function performSearch(query, data) {
+			let filteredData = data.filter(item => item.name.toLowerCase().includes(query.toLowerCase()));
+
+			// Chỉ lấy 5 kết quả đầu tiên (nếu có)
+			let limitedResults = filteredData.slice(0, 5);
+
+			return limitedResults;
+		}
+
+		function displayResults(results, resultList, isAccessory) {
+
+			results.forEach(function(item) {
+				var name = `${item.name} ${item.color} ${item.ram}GB ${item.rom}GB`;
+				if(isAccessory) {
+					name = item.name;
+				}
+				let listItem = `<li class="dropdown-item d-flex align-items-center" data-id=${item._id}>
+					<img src="/images/product/${item.image}" style="width: 30px; height: 30px" class="me-3"/>
+					<div class="d-flex flex-column">
+						<span class="dropdown-item-name">${name}</span>
+						<span class="dropdown-item-retail-price">${item.retailPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
+					</div>
+				</li>`;
+				resultList.append(listItem);
+			});
+		}
+
+		// Xử lý khi click ra ngoài dropdown để ẩn dropdown
+		$(document).on('click', function (e) {
+			if (!$(e.target).closest('.input-group').length) {
+				$('#searchResults').hide();
+				$('#searchResultsAccessory').hide();
+			}
+		});
+		$('#search-input').on('click', function() {
+			$('#searchResults').show(); 
+		});
+
+		$('#searchResults').on('click', '.dropdown-item', function() {
+			console.log('dropdown-item clicked')
+			const key = $(this).data('id');
+			if(phoneMap.hasOwnProperty(key)) {
+				phoneMap[key] += 1;
+			} else {
+				phoneMap[key] = 1;
+			}
+			const data = {
+				_id: key,
+				name: $(this).find('.dropdown-item-name').text(),
+				retailPrice: parseInt(removeDotFormatting($(this).find('.dropdown-item-retail-price').text()))
+			}
+			updateUI(data, phoneMap[key]);
+			updateLocalStorage();
+		});
+
+		$('#searchResultsAccessory').on('click', '.dropdown-item', function() {
+			console.log('dropdown-item-accessory clicked')
+			const key = $(this).data('id');
+			if(phoneMap.hasOwnProperty(key)) {
+				phoneMap[key] += 1;
+			} else {
+				phoneMap[key] = 1;
+			}
+			const data = {
+				_id: key,
+				name: $(this).find('.dropdown-item-name').text(),
+				retailPrice: parseInt(removeDotFormatting($(this).find('.dropdown-item-retail-price').text()))
+			}
+			updateUI(data, phoneMap[key]);
+			updateLocalStorage();
+		});
+
+		function updateLocalStorage() {
+			let arrayOfObjects = Object.keys(phoneMap).map(key => {
+				return {
+					id: key,
+					quantity: phoneMap[key]
+				};
+			});
+			localStorage.setItem('cart', JSON.stringify(Object.values(arrayOfObjects)));
+			localStorage.setItem('phoneMap', JSON.stringify(phoneMap));
+		}
+
+		function removeDotFormatting(currencyString) {
+			// Loại bỏ các ký tự không phải số và dấu phân cách
+			return currencyString.replace(/[^\d]/g, '');
+		}
+
+		// Xử lý next
+		$('.btn-next').click(() => {
+			if(Object.keys(phoneMap).length === 0) {
+				Swal.fire({
+					title: "Thông báo",
+					text: "Không thể thanh toán khi giỏ hàng trống!",
+					icon: "question"
+				});
+			} else {
+				let arrayOfObjects = Object.keys(phoneMap).map(key => {
+					return {
+						id: key,
+						quantity: phoneMap[key]
+					};
+				});
+				let cartText = JSON.parse(localStorage.getItem('cartText')) || [];
+				$('#tbody-phone tr').each(function(index) {
+					const tds = $(this).find('td');
+					const item = {
+						id: arrayOfObjects[index].id,
+						name: tds.eq(1).find('h6').first().text(),
+						quantity: tds.eq(2).find('input').first().val(),
+						price: tds.eq(3).find('h6').first().text(),
+						total: tds.eq(4).find('span').first().text()
+					}
+					
+					const existingItemIndex = cartText.findIndex((cartItem) => cartItem.id === item.id);
+
+					if (existingItemIndex !== -1) {
+						cartText[existingItemIndex] = item;
+					} else {
+						cartText.push(item);
+					}
+					localStorage.setItem('cartText', JSON.stringify(cartText));
+				});
+				updateLocalStorage();
+
+				window.location.href = 'selling/checkout';
+			}
+		})
+
+		function updateUILocalStorage(cart) {
+			const ids = cart.map(item => item.id);
+			if(ids.length > 0) {
+				fetch('/product/getAllByIds', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(ids)
+				})
+				.then(res => res.json())
+				.then(data => {
+					console.log(data)
+					data.forEach(item => {
+						var name;
+						if(item.isPhone) {
+							name = `${item.name} ${item.color} ${item.ram}GB ${item.rom}GB`;
+						} else {
+							name = item.name;
+						}
+						item = {
+							...item,
+							name: name
+						}
+						updateUI(item, phoneMap[item._id]);
+					})
+
+
+				})
+				.catch(err => {
+					console.error(err);
+				})
+			}
+		}	
+	});
+</script>

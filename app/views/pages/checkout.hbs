@@ -1,0 +1,590 @@
+<button class="btn btn-success mb-2" onclick="window.history.back()">Quay về trang chọn sản phẩm</button>
+
+<div class="row mb-5">
+	<div class="col-lg-4 d-flex align-items-stretch">
+		<div class="card w-100">
+			<div class="card-body p-4">
+				<div class="mb-4">
+					<h5 class="card-title fw-semibold">Số điện thoại KH</h5>
+				</div>
+				<div class="mb-4">
+					<div class="input-group">
+						<input class="form-control border" type="text" placeholder="Số điện thoại" id="phone">
+					</div>
+				</div>
+
+				<hr class="mx-4 mb-4"/>
+
+				<div class="mb-4">
+					<h5 class="card-title fw-semibold">Tên KH</h5>
+				</div>
+				<div class="mb-4">
+					<div class="input-group">
+						<input class="form-control border" type="text" placeholder="Tên KH" id="name">
+					</div>
+				</div>
+
+				<hr class="mx-4 mb-4"/>
+
+				<div class="mb-4">
+					<h5 class="card-title fw-semibold">Địa chỉ KH</h5>
+				</div>
+				<div class="mb-4">
+					<div class="input-group">
+						<input class="form-control border" type="text" placeholder="Địa chỉ KH" id="address">
+					</div>
+				</div>
+				
+				<hr class="mx-4 mb-4"/>
+
+				<div class="mb-4">
+					<h5 class="card-title fw-semibold">Tiền khách đưa</h5>
+				</div>
+				<div class="mb-4">
+					<div class="input-group">
+						<input class="form-control border money-input" type="text" placeholder="Tiền khách đưa" id="money-give">
+					</div>
+				</div>
+
+				<hr class="mx-4 mb-4"/>
+
+				<div class="mb-4">
+					<h5 class="card-title fw-semibold">Tiền thối lại</h5>
+				</div>
+				<div class="mb-4">
+					<div class="input-group">
+						<input class="form-control border" type="text" placeholder="Tiền thối lại" id="money-back">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="col-lg-8 d-flex align-items-stretch overflow-auto">
+		<div class="card w-100">
+			<div class="card-body p-4">
+				<h5 class="card-title fw-semibold mb-4">Danh sách sản phẩm</h5>
+				<div class="table-responsive">
+					<table class="table text-nowrap mb-0 align-middle text-center">
+						<thead class="text-dark fs-4">
+							<tr>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">STT</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Tên sản phẩm</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Số lượng</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Đơn giá</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Thành tiền</h6>
+							</th>
+							</tr>
+						</thead>
+						<tbody id="tbody-phone">
+							
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row mb-5">
+	<div class="col-lg-4 ms-auto">
+		<h3 class="text-primary">Tổng tiền: <span class="total-cart"></span></h3>
+		<button class="btn btn-primary btn-next">Thanh toán</button>
+	</div>
+</div>
+
+<div class="row mb-5">
+	<div class="col-12">
+		<div class="card w-100">
+			<div class="card-body p-4">
+				<h5 class="card-title fw-semibold mb-4">
+					<div class="d-flex justify-content-between align-items-center">
+						<span class="mb-0">Lịch sử giao dịch</span>
+						<div class="d-flex justify-content-center">
+							<button type="button" class="btn btn-info" id="prevBtn" disabled><i class="ti ti-chevron-left"></i></button>
+							<div class="border p-2 text-center" style="width: 80px;"><span id="curPage">-</span>/<span id="pageNum">-</span></div>
+							<button type="button" class="btn btn-info" id="nextBtn" disabled><i class="ti ti-chevron-right"></i></button>
+						</div>
+					</div>
+				</h5>
+				<div class="table-responsive">
+					<table class="table text-nowrap mb-0 align-middle text-center">
+						<thead class="text-dark fs-4">
+							<tr>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">STT</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Mã giao dịch</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Ngày giao dịch</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Tổng tiền</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Tiền khách đưa</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Tiền thối lại</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0">Chi tiết</h6>
+							</th>
+							</tr>
+						</thead>
+						<tbody id="tbody-history">
+							
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div id="loader" class="d-none">
+	<div class="d-flex justify-content-center align-items-center" style="height: 100vh">  
+		<div class="spinner-grow text-primary me-3" role="status" style="width: 3rem; height: 3rem; z-index: 20;">
+		</div>
+		<div class="spinner-grow text-success me-3" role="status" style="width: 3rem; height: 3rem; z-index: 20;">
+		</div>
+		<div class="spinner-grow text-danger" role="status" style="width: 3rem; height: 3rem; z-index: 20;">
+		</div>
+	</div>
+</div>
+
+
+<script>
+	$(function() {
+		const cartText = JSON.parse(localStorage.getItem('cartText'));
+		console.log(cartText)
+		var role = "{{user.role}}";
+		console.log(role);
+		const jwt = getCookie("jwt");
+		let currentPage = 1;
+		var customerId = null;
+		$("#nextBtn").click(function() {
+            currentPage++;
+            fetch(`/selling/order/customerPaging/${customerId}/${currentPage}`, {
+				headers: { 
+					'Content-Type': 'application/json', 
+					'Authorization': `Bearer ${jwt}`
+				},
+			})
+			.then(res => res.json())
+			.then(data => {
+                renderUI(data.orders);
+                currentPage = data.page;
+                $("#curPage").text(currentPage);
+                $("#pageNum").text(data.pageNum);
+                $("#prevBtn").prop("disabled", false);
+                if (currentPage == data.pageNum) {
+                    $(this).prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+        $("#prevBtn").click(function() {
+            currentPage--;
+            fetch(`/selling/order/customerPaging/${customerId}/${currentPage}`, {
+				headers: { 
+					'Content-Type': 'application/json', 
+					'Authorization': `Bearer ${jwt}`
+				},
+			})
+			.then(res => res.json())
+			.then(data => {
+                renderUI(data.orders);
+                currentPage = data.page;
+                $("#curPage").text(currentPage);
+                $("#pageNum").text(data.pageNum);
+                $("#nextBtn").prop("disabled", false);
+                if (currentPage == 1) {
+                    $("#prevBtn").prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+		function renderUI(orders) {
+			let trs = ``;
+			orders.forEach((item, index) => {
+				const dateCheckout = moment(item.dateCheckout).locale('vi').format('DD-MM-YYYY');
+				trs +=  `<tr data-id=${item._id}>
+					<td class="border-bottom-0"><h6 class="fw-semibold mb-0">${index + 1}</h6></td>
+					<td class="border-bottom-0 text-wrap">
+						<h6 class="fw-semibold mb-0">${item._id}</h6>                        
+					</td>
+					<td class="border-bottom-0">
+						<h6 class="fw-semibold mb-0">${dateCheckout}</h6>
+					</td>
+
+					<td class="border-bottom-0">
+						<h6 class="fw-semibold mb-0 price-cart">${item.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h6>
+					</td>
+					<td class="border-bottom-0">
+						<h6 class="fw-semibold mb-0 total-price-cart">${item.moneyGiven.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h6>
+					</td>
+					<td class="border-bottom-0">
+						<h6 class="fw-semibold mb-0 total-price-cart">${item.moneyBack.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h6>
+					</td>
+					<td class="border-bottom-0">
+						<button class="btn btn-success mb-0 btn-detail">Chi tiết</button>
+					</td>
+				</tr>`;
+			})
+			$('#tbody-history').empty().append(trs);
+		}
+
+		let trs = ``;
+		cartText.forEach((item, index) => {
+			trs += `<tr>
+					<td class="border-bottom-0"><h6 class="fw-semibold mb-0">${index + 1}</h6></td>
+					<td class="border-bottom-0 text-wrap">
+						<h6 class="fw-semibold mb-0">${item.name}</h6>                        
+					</td>
+					<td class="border-bottom-0">
+						<h6 class="fw-semibold mb-0">${item.quantity}</h6>                        
+					</td>
+					<td class="border-bottom-0">
+						<h6 class="fw-semibold mb-0 price-cart">${item.price}</h6>
+					</td>
+					<td class="border-bottom-0">
+						<h6 class="fw-semibold mb-0 total-price-cart">${item.total}</h6>
+					</td>
+				</tr>`
+		});
+		function removeDotFormatting(currencyString) {
+			// Loại bỏ các ký tự không phải số và dấu phân cách
+			return currencyString.replace(/[^\d]/g, '');
+		}
+		
+		$('#tbody-phone').empty().append(trs);
+
+		function updateTotal() {
+			let total = 0;
+			$('#tbody-phone tr').each(function() {
+				const priceText = removeDotFormatting($(this).find('.total-price-cart').text());
+				console.log($(this).find('.total-price-cart').text())
+				total += parseInt(priceText);
+			});
+
+			$('.total-cart').text(total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+		}
+		updateTotal();
+		let isNew = false;
+		$('#phone').on('input', function() {
+			const phone = $(this).val();
+			if(phone.length > 10) {
+				$(this).val(phone.slice(0, 10));
+			}
+			if (isNaN(phone)) {
+				// Không phải số thì cook
+				$(this).val(phone.replace(/\D/g, ''));
+			}
+			
+			if (phone.length === 10) {
+				if (phone.charAt(0) !== '0') {
+					Swal.fire({
+						title: "Thông báo",
+						text: "Đây không phải số điện thoại Việt Nam!",
+						icon: "warning"
+					});
+				} else {
+
+					fetch(`/customer/getOne/${phone}`)
+						.then(res => {
+							if (res.status !== 200) {
+								throw new Error();
+							}
+							return res.json();
+						})
+						.then(data => {
+							console.log(data);
+							if (data === null) {
+								Swal.fire({
+									title: "Thông tin",
+									text: "Đây là khách hàng mới",
+									icon: "info"
+								});
+								isNew = true;
+								$('#name').val('');
+								$('#address').val('');
+								$('#name').removeAttr('readonly');
+								$('#address').removeAttr('readonly');
+							} else {
+								isNew = false;
+								customerId = data._id;
+								$('#name').val(data.name);
+								$('#address').val(data.address);
+								$('#name').attr('readonly', 'true');
+								$('#address').attr('readonly', 'true');
+								fetch(`/selling/order/customerPaging/${customerId}/${currentPage}`, {
+									headers: { 
+										'Content-Type': 'application/json', 
+										'Authorization': `Bearer ${jwt}`
+									},
+								})
+								.then(res => res.json())
+								.then(data => {
+									renderUI(data.orders);
+									currentPage = data.page;
+									$("#curPage").text(currentPage);
+									$("#pageNum").text(data.pageNum);
+									$("#prevBtn").prop("disabled", true);
+									$("#nextBtn").prop("disabled", false);
+									if (currentPage == data.pageNum) {
+										$("#nextBtn").prop("disabled", true);
+									}
+								})
+								.catch(err => console.log(err));
+							}
+						})
+						.catch(err => {
+							console.error(err);
+							Swal.fire({
+								title: "Lỗi",
+								text: "Đã xảy ra lỗi!",
+								icon: "error"
+							});
+						});
+				}
+			}
+		});
+		$('#tbody-history').on('click', '.btn-detail', function() {
+			const id = $(this).closest('tr').data('id');
+			fetch(`/selling/order/${id}`)
+			.then(res => {
+				if(res.status !== 200) throw new Error();
+				return res.json();
+			})
+			.then(data => {
+				console.log(data);
+				let trs = ``;
+				data.forEach(order => {
+					var name = order.product.name;
+					if(order.product.isPhone) {
+						name = `${order.product.name} ${order.product.color} ${order.product.ram}GB ${order.product.rom}GB`;
+					}
+					trs += `
+						<tr>
+							<td class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 total-price-cart">${name}</h6>
+							</td>
+							<td class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 total-price-cart">${order.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h6>
+							</td>
+							<td class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 total-price-cart">${order.quantity}</h6>
+							</td>
+						</tr>`
+
+
+				})
+				let htmls = `<div>
+					<table class="table table-bordered">
+						<thead>
+						<tr>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 text-primary">Tên điện thoại</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 text-primary">Giá</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 text-primary">Số lượng</h6>
+							</th>
+						</tr>
+						</thead>
+						<tbody>
+							${trs}
+						</tbody>
+					</table>
+				</div>`;
+				Swal.fire({
+					title: "Chi tiết",
+					width: 'auto',
+					customClass: 'sweet-width',
+					html: htmls,
+					icon: "info",
+
+				});
+			})
+			.catch(err => {
+				console.error(err);
+			})
+		})
+		$('.money-input').on('input', function() {
+			// Lấy giá trị nhập vào từ input
+			let input = $(this).val();
+
+			// Chuyển đổi giá trị nhập vào thành chuỗi có định dạng tiền tệ tiếng Việt
+			let formattedValue = new Intl.NumberFormat('vi-VN')
+								.format(Number(input.replace(/[^\d,]/g, ''))); 
+			// Gán giá trị đã định dạng trở lại vào input
+			$(this).val(formattedValue);
+		});
+		$('#money-give').keyup(function() {
+			const total = parseInt(removeDotFormatting($('.total-cart').text()));
+			const give = parseInt(removeDotFormatting($(this).val()));
+			const payback = give - total;
+			console.log(total, give)
+			$('#money-back').val(payback.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+		});
+		$('.btn-next').click(function() {
+			const total = parseInt(removeDotFormatting($('.total-cart').text()));
+			const phone = $('#phone').val();
+			const name = $('#name').val();
+			const address = $('#address').val();
+			const moneyGiven = parseInt(removeDotFormatting($('#money-give').val()));
+			const moneyBack = parseInt(removeDotFormatting($('#money-back').val()));
+			if(!phone || !name || !address) {
+				Swal.fire({
+					title: "Thông tin còn thiếu",
+					text: "Chưa nhập đủ thông tin khách hàng!",
+					icon: "warning"
+				});
+				return;
+			}
+			if(isNaN(moneyGiven) || isNaN(moneyBack) || moneyGiven < total) {
+				Swal.fire({
+					title: "Tiền không hợp lệ",
+					text: "Tiền khách đưa còn thiếu!",
+					icon: "warning"
+				});
+				return;
+			}
+			const cart = JSON.parse(localStorage.getItem('cart'));
+			const cartText = JSON.parse(localStorage.getItem('cartText'));
+			const orderDetails = cart.map((item, index) => {
+				return {
+					product: item.id,
+					quantity: item.quantity,
+					price: parseInt(removeDotFormatting(cartText[index].price))
+				}
+			});
+			console.log(orderDetails);
+			
+			console.log(total, moneyGiven, moneyBack);
+			
+
+			fetch('/selling/checkout', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ total, moneyGiven, moneyBack, orderDetails, isNew, phone, address, name })
+			})
+			.then(res => {
+				if(res.status === 200) {
+					res.json().then(data => {
+						const swalWithBootstrapButtons = Swal.mixin({
+							customClass: {
+								confirmButton: "btn btn-success me-3",
+								cancelButton: "btn btn-danger"
+							},
+							buttonsStyling: false
+						});
+						swalWithBootstrapButtons.fire({
+							title: "Thông tin",
+							text: "Có in hóa đơn không?",
+							icon: "question",
+							showCancelButton: true,
+							confirmButtonText: "In!",
+							cancelButtonText: "Không!",
+						}).then((result) => {
+							if (result.isConfirmed) {
+								$('#loader').removeClass('d-none');
+								fetch(`/selling/invoice/${data._id}`)
+									.then(response => {
+										if (!response.ok) {
+											throw new Error('Network response was not ok');
+										}
+										// Chuyển đổi response thành file PDF
+										return response.blob();
+									})
+									.then(blob => {
+										
+										const url = window.URL.createObjectURL(blob);
+										const a = document.createElement('a');
+										a.href = url;
+										a.download = 'invoice.pdf';
+										document.body.appendChild(a);
+										a.click();
+										window.URL.revokeObjectURL(url);
+										document.body.removeChild(a);
+										$('#loader').addClass('d-none');
+										Swal.fire({
+											title: "Thông tin",
+											text: "Hoàn thành đơn hàng!",
+											icon: "info"
+										});
+										localStorage.removeItem('cart');
+										localStorage.removeItem('cartText');
+										localStorage.removeItem('phoneMap');
+										setTimeout(() => {
+											window.location.href = '/selling';
+										}, 2000);
+									})
+									.catch(error => {
+										console.error('There has been a problem with your fetch operation:', error);
+									});
+							} else {
+								Swal.fire({
+									title: "Thông tin",
+									text: "Hoàn thành đơn hàng!",
+									icon: "info"
+								});
+								localStorage.removeItem('cart');
+								localStorage.removeItem('cartText');
+								localStorage.removeItem('phoneMap');
+								setTimeout(() => {
+									window.location.href = '/selling';
+								}, 2000);
+							}
+								
+						});
+						
+					})
+					
+				} else {
+					Swal.fire({
+						title: "Lỗi",
+						text: "Đã xảy ra lỗi!",
+						icon: "error"
+					});
+				}
+			})
+			.catch(err => {
+				console.error(err);
+				Swal.fire({
+					title: "Lỗi",
+					text: "Đã xảy ra lỗi!",
+					icon: "error"
+				});
+			});
+		})
+	})
+	function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
+                // Trả về giá trị của cookie
+                return cookie.substring(name.length + 1);
+            }
+        }
+        // Trả về null nếu không tìm thấy cookie
+        return null;
+    }
+</script>

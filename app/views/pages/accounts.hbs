@@ -1,0 +1,520 @@
+<div class="d-flex align-items-center justify-content-between gap-5">
+    <h3 style="white-space: nowrap;">Nhân viên</h3>
+    <div class="input-group w-50">
+        <input type="search" id="searchInput" class="form-control" placeholder="Tìm theo họ tên nhân viên">
+        <button type="button" class="btn btn-primary" id="searchBtn"><i class="ti ti-search"></i></button>
+    </div>
+    <div>
+        <button id="addStaffBtn" class="btn btn-primary fs-5" type="button"
+            data-bs-toggle="modal" data-bs-target="#accountModal"
+        ><i class="ti ti-plus"></i><i class="ti ti-user"></i></button>
+    </div>
+</div>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Ảnh đại diện</th>
+            <th scope="col">Họ tên</th>
+            <th scope="col">Email</th>
+            <th scope="col"></th>
+            <th scope="col" class="d-flex gap-2 align-items-center justify-content-center">
+                <button type="button" class="btn btn-info" id="prevBtn" disabled><i class="ti ti-chevron-left"></i></button>
+                <div class="border p-2 text-center" style="width: 80px;"><span id="curPage">1</span>/<span id="pageNum">{{pageNum}}</span></div>
+                <button type="button" class="btn btn-info" id="nextBtn"><i class="ti ti-chevron-right"></i></button>
+            </th>
+        </tr>
+    </thead>
+    <tbody class="user-container">
+        {{#each users}}
+        <tr style="vertical-align: middle;" class="clickable-row" data-id="{{_id}}">
+            <td>
+                <img src="/images/profile/{{avatar}}" alt="avatar" style="object-fit: cover; height: 60px; width: 60px; border-radius: 50%;">
+            </td>
+            <td>{{fullname}}</td>
+            <td>{{email}}</td>
+            <td class="text-center">
+                {{#ifEquals orders.length 0}}
+                <button type="button" class="btn btn-danger delete-btn"
+                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                    data-id="{{_id}}"
+                    data-name="{{fullname}}"
+                ><i class="ti ti-trash"></i></button>
+                {{/ifEquals}}
+            </td>
+            <td class="text-center">
+                {{#ifEquals verified true}}
+                <button type="button" class="btn btn-success resend-email-btn me-2" style="width: 50px;" disabled><i class="ti ti-check"></i></button>
+                {{else}}
+                <button type="button" class="btn btn-success resend-email-btn me-2" style="width: 50px;" data-email="{{email}}"><i class="ti ti-mail"></i></button>
+                {{/ifEquals}}
+                <button type="button" class="btn btn-secondary reset-password-btn me-2" 
+                    data-id="{{_id}}"
+                    data-name="{{fullname}}"
+                    data-bs-toggle="modal" data-bs-target="#resetPasswordModal"
+                ><i class="ti ti-refresh"></i><i class="ti ti-key"></i></button>
+                <button type="button" class="btn btn-danger lock-btn"
+                    data-id="{{_id}}"
+                    data-name="{{fullname}}"
+                    data-lock="{{locked}}"
+                    data-bs-toggle="modal" data-bs-target="#lockModal"
+                >
+                    {{#ifEquals locked true}}
+                    <i class="ti ti-lock"></i>
+                    {{else}}
+                    <i class="ti ti-lock-open"></i>
+                    {{/ifEquals}}
+                </button>
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+<!-- Modal -->
+<div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="accountModalLabel">Thêm tài khoản</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="fullnameInput" class="form-label">Họ tên</label>
+                        <input type="text" class="form-control" id="fullnameInput">
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailInput" class="form-label">Địa chỉ email</label>
+                        <input type="email" class="form-control" id="emailInput">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="addBtn">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="resetPasswordModalLabel">Đặt lại mật khẩu mặc định</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc là muốn đặt lại mật khẩu mặc định cho nhân viên <strong id="resetPasswordName"></strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="resetPasswordBtn">Đặt lại</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="lockModal" tabindex="-1" aria-labelledby="lockModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="lockModalLabel"></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="lockBtn"></button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deleteModalLabel">Xóa tài khoản</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc là muốn xóa tài khoản của nhân viên <strong id="deleteName"></strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="deleteBtn">Xóa</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var currentPage = 1;
+    var selectedId;
+    var locked;
+    var selectedBtn;
+
+    if ({{pageNum}} == 1) {
+        $("#nextBtn").prop("disabled", true);
+    }
+
+    $(function() {
+        $('.clickable-row td:not(:last-child):not(:nth-last-child(2))').css('cursor', 'pointer');
+
+        $("#addBtn").click(function() {
+            const fullname = $("#fullnameInput").val().trim();
+            const email = $("#emailInput").val().trim();
+            if (fullname == '' || email == '') {
+                toastr.error("Xin hãy nhập đầy đủ thông tin!");
+                return;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                toastr.error("Xin hãy nhập đúng định dạng Email!");
+                return;
+            }
+            const body = {
+                fullname,
+                email,
+            }
+            const jwt = getCookie("jwt");
+            fetch("/account", {
+                method: "POST",
+                headers: { 
+                    "Content-Type":"application/json",
+                    "Authorization": `Bearer ${jwt}`,
+                },
+                body: JSON.stringify(body),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    toastr.error(data.error);
+                } else {
+                    $("#accountModal").modal('hide');
+                    $("#accountModal form").trigger("reset");
+                    $(".user-container").prepend(userRow(data.userObj));
+                    $("#pageNum").text(data.pageNum);
+                    if (data.pageNum > 1) {
+                        $("#nextBtn").prop("disabled", false);
+                    }
+                    const btn = $(".user-container tr:first-child .resend-email-btn");
+                    btn.prop("disabled", true);
+                    // Set the initial countdown value
+                    let countdown = 60;
+                    // Update button text with countdown
+                    btn.html(countdown);
+
+                    // Start the countdown
+                    const countdownInterval = setInterval(() => {
+                        countdown--;
+
+                        // Update button text with countdown
+                        btn.html(countdown);
+
+                        // Check if countdown is complete
+                        if (countdown <= 0) {
+                            // Enable the button
+                            btn.prop("disabled", false);
+                            btn.html('<i class="ti ti-mail"></i>');
+                            
+                            // Clear the interval to stop the countdown
+                            clearInterval(countdownInterval);
+                        }
+                    }, 1000);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+        $(".user-container").on("click", ".resend-email-btn", function () {
+            $(this).prop("disabled", true);
+            const email = $(this).data("email");
+            const body = {
+                email
+            }
+            const jwt = getCookie("jwt");
+            fetch("/account", {
+                method: "PUT",
+                headers: {
+                    "Content-Type":"application/json",
+                    "Authorization": `Bearer ${jwt}`,
+                },
+                body: JSON.stringify(body),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.error) {
+                    // Set the initial countdown value
+                    let countdown = 60;
+                    // Update button text with countdown
+                    $(this).html(countdown);
+
+                    // Start the countdown
+                    const countdownInterval = setInterval(() => {
+                        countdown--;
+
+                        // Update button text with countdown
+                        $(this).html(countdown);
+
+                        // Check if countdown is complete
+                        if (countdown <= 0) {
+                            // Enable the button
+                            $(this).prop("disabled", false);
+                            $(this).html('<i class="ti ti-mail"></i>');
+                            
+                            // Clear the interval to stop the countdown
+                            clearInterval(countdownInterval);
+                        }
+                    }, 1000);
+                } else {
+                    toastr.error(data.error);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+        $(".user-container").on("click", ".reset-password-btn", function () {
+            $("#resetPasswordName").text($(this).data('name'));
+            selectedId = $(this).data('id');
+        });
+
+        $("#resetPasswordBtn").click(() => {
+            const jwt = getCookie("jwt");
+            fetch(`/account/reset-password/${selectedId}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${jwt}`,
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    toastr.error(data.error);
+                } else {
+                    toastr.success(data.success);
+                    $("#resetPasswordModal").modal("hide");
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+        $(".user-container").on("click", ".lock-btn", function () {
+            selectedId = $(this).data('id');
+            selectedBtn = $(this);
+            if ($(this).data("lock") === false) {
+                $("#lockModal h1").text("Khóa tài khoản");
+                $("#lockModal .modal-body").html(`
+                    Bạn muốn khóa tài khoản của nhân viên <strong>${$(this).data("name")}</strong>?
+                `)
+                $("#lockBtn").text("Khóa");
+                locked = true;
+            } else {
+                $("#lockModal h1").text("Mở khóa tài khoản");
+                $("#lockModal .modal-body").html(`
+                    Bạn muốn mở khóa tài khoản của nhân viên <strong>${$(this).data("name")}</strong>?
+                `)
+                $("#lockBtn").text("Mở khóa");
+                locked = false;
+            }
+        });
+
+        $("#lockBtn").click(() => {
+            const body = {
+                userId: selectedId,
+                locked: locked,
+            }
+            const jwt = getCookie("jwt");
+            console.log(jwt);
+            fetch('/account/lock', {
+                method: "PUT",
+                headers: {
+                    "Content-Type":"application/json",
+                    "Authorization": `Bearer ${jwt}`,
+                },
+                body: JSON.stringify(body),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    toastr.error(data.error);
+                } else {
+                    selectedBtn.data("lock", locked);
+                    if (locked) {
+                        selectedBtn.html('<i class="ti ti-lock"></i>');
+                    } else {
+                        selectedBtn.html('<i class="ti ti-lock-open"></i>');
+                    }
+                    toastr.success(data.success);
+                    $("#lockModal").modal("hide");
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+        $('.user-container').on('click', '.clickable-row td:not(:last-child):not(:nth-last-child(2))', function() {
+            const userId = $(this).closest("tr").data("id");
+            window.location.href = `/account/${userId}`;
+        });
+
+        $("#nextBtn").click(function() {
+            currentPage++;
+            fetch(`/account/page/${currentPage}`)
+            .then(res => res.json())
+            .then(data => {
+                $(".user-container").empty();
+                for (const staff of data.users) {
+                    $(".user-container").append(userRow(staff));
+                }
+                currentPage = data.page;
+                $("#curPage").text(currentPage);
+                $("#pageNum").text(data.pageNum);
+                $("#prevBtn").prop("disabled", false);
+                if (currentPage == data.pageNum) {
+                    $(this).prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+        $("#prevBtn").click(function() {
+            currentPage--;
+            fetch(`/account/page/${currentPage}`)
+            .then(res => res.json())
+            .then(data => {
+                $(".user-container").empty();
+                for (const staff of data.users) {
+                    $(".user-container").append(userRow(staff));
+                }
+                currentPage = data.page;
+                $("#curPage").text(currentPage);
+                $("#pageNum").text(data.pageNum);
+                $("#nextBtn").prop("disabled", false);
+                if (currentPage == 1) {
+                    $("#prevBtn").prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+        $("#searchBtn").click(function () {
+            const name = $("#searchInput").val();
+            fetch(`/account/search?fullname=${name}`)
+            .then(res => res.json())
+            .then(data => {
+                $(".user-container").empty();
+                for (const staff of data.users) {
+                    $(".user-container").append(userRow(staff));
+                }
+                if (name != '') {
+                    $("#prevBtn").prop("disabled", true);
+                    $("#nextBtn").prop("disabled", true);
+                    $("#curPage").text("-");
+                    $("#pageNum").text("-");
+                } else {
+                    $("#nextBtn").prop("disabled", false);
+                    $("#curPage").text(1);
+                    $("#pageNum").text(data.pageNum);
+                }
+                if (data.pageNum == 1) {
+                    $("#nextBtn").prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+        $(".user-container").on("click", ".delete-btn", function() {
+            $("#deleteName").text($(this).data("name"));
+            selectedId = $(this).data("id");
+            selectedBtn = $(this);
+        });
+
+        $("#deleteBtn").click(() => {
+            $(".delete-btn").prop("disabled", true);
+            const jwt = getCookie("jwt");
+            fetch(`/account/${selectedId}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${jwt}`,
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                $(".delete-btn").prop("disabled", false);
+                if (data.error) {
+                    toastr.error(data.error);
+                } else {
+                    $("#deleteModal").modal("hide");
+                    currentPage = data.page;
+                    $("#curPage").text(currentPage);
+                    $("#pageNum").text(data.pageNum);
+                    $(".user-container").empty();
+                    if (data.pageNum == 1) {
+                        $("#nextBtn").prop("disabled", true);
+                    }
+                    for (const staff of data.users) {
+                        $(".user-container").append(userRow(staff));
+                    }
+                    toastr.success(data.success);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+    });
+
+    function userRow(data) {
+        return `
+            <tr style="vertical-align: middle;" class="clickable-row" data-id="${data._id}">
+                <td>
+                    <img src="/images/profile/${data.avatar}" alt="avatar" style="object-fit: cover; height: 60px; width: 60px; border-radius: 50%;">
+                </td>
+                <td>${data.fullname}</td>
+                <td>${data.email}</td>
+                <td class="text-center">
+                    ${data.orders.length == 0 ? `<button type="button" class="btn btn-danger delete-btn"
+                                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                    data-id="${data._id}"
+                                                    data-name="${data.fullname}"
+                                                ><i class="ti ti-trash"></i></button>` : ''}
+                </td>
+                <td class="text-center">
+                    ${data.verified == true ? '<button type="button" class="btn btn-success resend-email-btn me-2" style="width: 50px;" disabled><i class="ti ti-check"></i></button>' : `<button type="button" class="btn btn-success resend-email-btn me-2" style="width: 50px;" data-email="${data.email}"><i class="ti ti-mail"></i></button>`}
+                    <button type="button" class="btn btn-secondary reset-password-btn me-2" 
+                        data-id="${data._id}"
+                        data-name="${data.fullname}"
+                        data-bs-toggle="modal" data-bs-target="#resetPasswordModal"
+                    ><i class="ti ti-refresh"></i><i class="ti ti-key"></i></button>
+                    <button type="button" class="btn btn-danger lock-btn"
+                        data-id="${data._id}"
+                        data-name="${data.fullname}"
+                        data-lock="${data.locked}"
+                        data-bs-toggle="modal" data-bs-target="#lockModal"
+                    >
+                        ${data.locked == true ? '<i class="ti ti-lock"></i>' : '<i class="ti ti-lock-open"></i>'}
+                    </button>
+                </td>
+            </tr>
+        `;
+    }
+
+    function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
+                // Trả về giá trị của cookie
+                return cookie.substring(name.length + 1);
+            }
+        }
+        // Trả về null nếu không tìm thấy cookie
+        return null;
+    }
+</script>

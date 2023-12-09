@@ -1,0 +1,92 @@
+<div class="row align-items-center mb-5">
+    <div class="col-4 px-5">
+        <img src="/images/profile/{{staff.avatar}}" alt="avatar" class="img-fluid object-fit-cover" 
+            style="aspect-ratio: 1; border-radius: 50%;"
+        >
+    </div>
+    <div class="col-8 pe-5">
+        {{!-- <h2>{{staff.fullname}}</h2> --}}
+        <table class="table align-middle">
+            <tr>
+                <th scope="row">Họ tên</th>
+                <td>{{staff.fullname}}</td>
+            </tr>
+            <tr>
+                <th scope="row">Email</th>
+                <td>
+                    {{staff.email}}
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Tên đăng nhập</th>
+                <td>{{staff.username}}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="px-5">
+    <h3 class="mb-4">Lịch sử bán hàng</h3>
+    <div class="orders-container">
+        {{#each orders}}
+        <div class="card p-3 flex-row">
+            <div class="col-4 border-end">
+                <div class="fw-bold">Khách hàng</div>
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0px 10px;">
+                    <tr>
+                        <th>Tên</th><td>{{customer.name}}</td>
+                    </tr>
+                    <tr>
+                        <th>SĐT</th><td>{{customer.phone}}</td>
+                    </tr>
+                    <tr>
+                        <th>Địa chỉ</th><td>{{customer.address}}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-8">
+                <table style="border-collapse: separate; border-spacing: 10px 5px;">
+                    <tr>
+                        <th>Ngày lập:</th><td>{{annoucementDateFormat dateCheckout}}</td>
+                    </tr>
+                    <tr>
+                        <table class="ps-2" style="width: 100%; border-collapse: separate; border-spacing: 0px 10px;">
+                            <thead>
+                                <tr>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Giá</th>
+                                    <th class="text-end">Số lượng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#each orderDetails}}
+                                <tr>
+                                    <td>{{phone.name}} {{phone.color}} {{phone.ram}}GB {{phone.rom}}GB</td>
+                                    <td>{{formatMoney price}}</td>
+                                    <td class="text-end">{{quantity}}</td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </tr>
+                </table>
+                <div class="row justify-content-end">
+                    <div class="col-4">
+                        <table class="float-right" style="width: 100%;; border-collapse: separate; border-spacing: 0px 5px;">
+                            <tr>
+                                <th>Tổng cộng</th><td class="text-end">{{formatMoney total}}</td>
+                            </tr>
+                            <tr>
+                                <th>Tiền đưa</th><td class="text-end">{{formatMoney moneyGiven}}</td>
+                            </tr>
+                            <tr>
+                                <th>Tiền thối</th><td class="text-end">{{formatMoney moneyBack}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+</div>

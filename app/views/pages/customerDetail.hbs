@@ -1,0 +1,9 @@
+<div class="mb-4 fs-5">
+    <div class="mb-2"><strong>Phone number</strong>: {{customer.phone}}</div>
+    <div class="mb-2"><strong>Customer Name</strong>: {{customer.name}}</div>
+    <div><strong>Customer Address</strong>: {{customer.address}}</div>
+</div>
+<div class="mb-2 fs-6">Purchase history</div>
+{{#each customer.order}}
+
+{{/each}}

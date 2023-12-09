@@ -1,0 +1,569 @@
+<div class="d-flex justify-content-center mb-5">
+	<div id="reportrange" class="pull-right rounded form-control w-auto">
+		<i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
+		<span></span> <b class="caret"></b>
+	</div>
+</div>
+
+<div class="row mb-5">
+	<div class="col">
+		<div class="card bg-success text-white text-center">
+			<div class="card-body p-4">
+				Tổng doanh thu: 
+				<span class="revenue-text"></span>
+			</div>	
+		</div>
+	</div>
+	<div class="col">
+		<div class="card bg-danger text-white text-center">
+			<div class="card-body p-4">
+				Tổng lợi nhuận: 
+				<span class="profit-text"></span>
+			</div>	
+		</div>
+	</div>
+</div>
+
+<div class="row mb-5">
+	<div class="col-12">
+		<div class="card w-100">
+			<div class="card-body p-4">
+				<h5 class="card-title fw-semibold mb-4">Biểu đồ thống kê</h5>
+				<div id="statistics-chart"></div>
+				<div id="statistics-linechart"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row mb-5">
+	<div class="col-12">
+		<div class="card w-100">
+			<div class="card-body p-4">
+				<h5 class="card-title fw-semibold mb-4">
+					<div class="d-flex justify-content-between align-items-center">
+						<span class="mb-0">Lịch sử giao dịch</span>
+						<div class="d-flex justify-content-center">
+							<button type="button" class="btn btn-info" id="prevBtn" disabled><i class="ti ti-chevron-left"></i></button>
+							<div class="border p-2 text-center" style="width: 80px;"><span id="curPage">1</span>/<span id="pageNum">{{pageNum}}</span></div>
+							<button type="button" class="btn btn-info" id="nextBtn"><i class="ti ti-chevron-right"></i></button>
+						</div>
+					</div>
+				</h5>
+				<div class="table-responsive">
+					<table class="table text-nowrap mb-0 align-middle text-center">
+						<thead class="text-dark fs-4">
+							<tr>
+								<th class="border-bottom-0">
+									<h6 class="fw-semibold mb-0">STT</h6>
+								</th>
+								<th class="border-bottom-0">
+									<h6 class="fw-semibold mb-0">Mã giao dịch</h6>
+								</th>
+								<th class="border-bottom-0">
+									<h6 class="fw-semibold mb-0">Ngày giao dịch</h6>
+								</th>
+								<th class="border-bottom-0">
+									<h6 class="fw-semibold mb-0">Tổng tiền</h6>
+								</th>
+								<th class="border-bottom-0">
+									<h6 class="fw-semibold mb-0">Tiền khách đưa</h6>
+								</th>
+								<th class="border-bottom-0">
+									<h6 class="fw-semibold mb-0">Tiền thối lại</h6>
+								</th>
+								<th class="border-bottom-0">
+									<h6 class="fw-semibold mb-0">Chi tiết</h6>
+								</th>
+							</tr>
+						</thead>
+						<tbody id="tbody-history">
+							
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	$(function() {
+		var role = "{{user.role}}";
+		console.log(role);
+		const jwt = getCookie("jwt");
+
+		let currentPage = 1;
+		$("#nextBtn").click(function() {
+            currentPage++;
+            fetch(`/statistics/dateToDatePaging/${currentPage}`, {
+				method: 'POST',
+				headers: { 
+					'Content-Type': 'application/json', 
+					'Authorization': `Bearer ${jwt}`
+				},
+				body: JSON.stringify({ startDate, endDate })
+			})
+			.then(res => res.json())
+			.then(data => {
+                renderUI(data.orders);
+                currentPage = data.page;
+                $("#curPage").text(currentPage);
+                $("#pageNum").text(data.pageNum);
+                $("#prevBtn").prop("disabled", false);
+                if (currentPage == data.pageNum) {
+                    $(this).prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+        $("#prevBtn").click(function() {
+            currentPage--;
+            fetch(`/statistics/dateToDatePaging/${currentPage}`, {
+				method: 'POST',
+				headers: { 
+					'Content-Type': 'application/json', 
+					'Authorization': `Bearer ${jwt}`
+				},
+				body: JSON.stringify({ startDate, endDate })
+			})
+			.then(res => res.json())
+			.then(data => {
+                renderUI(data.orders);
+                currentPage = data.page;
+                $("#curPage").text(currentPage);
+                $("#pageNum").text(data.pageNum);
+                $("#nextBtn").prop("disabled", false);
+                if (currentPage == 1) {
+                    $("#prevBtn").prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+		var start = moment().subtract(29, 'days');
+		var end = moment();
+		var startDate;
+		var endDate;
+		function cb(start, end, label) {
+
+			$('#reportrange span').html(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+			let typeChart = 'line';
+			if(label === 'Hôm nay' || label === 'Hôm qua' 
+			|| label === 'Tháng này'|| label === 'Tháng trước') {
+				typeChart = 'line';
+			} else if(label === '7 ngày gần nhất'){
+				typeChart = 'bar';
+			} else {
+				typeChart = 'line';
+			}
+			console.log(typeChart);
+			startDate = start.format('YYYY-MM-DD');
+			endDate = end.format('YYYY-MM-DD');
+			
+			
+			fetch('/statistics/dateToDate', {
+				method: 'POST',
+				headers: { 
+					'Content-Type': 'application/json', 
+					'Authorization': `Bearer ${jwt}`
+				},
+				body: JSON.stringify({ startDate, endDate })
+			})
+			.then(res => res.json())
+			.then(data => {
+				console.log(data);
+				if(data.totalRevenue) {
+					$('.revenue-text').text(data.totalRevenue.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+				} else {
+					$('.revenue-text').text(0..toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+				}
+				if(data.totalProfit) {
+					$('.profit-text').text(data.totalProfit.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+				} else {
+					$('.profit-text').text(0..toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }));
+				}
+				var revenues = data.orders ? data.orders.map(order => order.total) : [0];
+				if (revenues.length > 0) {
+					revenues.unshift(0); // Thêm số 0 vào đầu mảng nếu mảng không rỗng
+				}
+				if(typeChart == 'bar') {
+					const dates = [];
+
+					let currentDate = start.clone(); // Sử dụng clone để tránh thay đổi biến gốc
+
+					while (currentDate.isSameOrBefore(end, 'day')) {
+						dates.push(currentDate.format('DD/MM/YYYY'));
+						currentDate.add(1, 'day');
+					}
+
+					const revenueByDate = {};
+					const profitByDate = {};
+
+					dates.forEach(date => {
+						const currentDate = moment(date, 'DD/MM/YYYY');
+
+						// Tính toán revenue và profit cho ngày hiện tại
+						const revenue = data.orders
+							.filter(order => moment(order.dateCheckout).isSame(currentDate, 'day'))
+							.reduce((acc, order) => acc + order.total, 0);
+
+						const profit = data.orders
+							.filter(order => moment(order.dateCheckout).isSame(currentDate, 'day'))
+							.reduce((acc, order) => acc + order.profit, 0);
+
+						revenueByDate[date] = revenue;
+						profitByDate[date] = profit;
+					});
+					const revenueArray = Object.values(revenueByDate);
+					const profitArray = Object.values(profitByDate);
+					console.log(revenueArray)
+					if(role === 'ROLE ADMIN') {
+						const profits = data.orders ? data.orders.map(order => order.profit) : [0];
+						renderChart(revenueArray, dates, profitArray);	
+					} else {
+						renderChart(revenueArray, dates);	
+					}
+				} else {
+					if(role === 'ROLE ADMIN') {
+						var profits = data.orders ? data.orders.map(order => order.profit) : [0];
+						if(profits.length > 0) {
+							profits.unshift(0);
+						}
+						renderLineChart(revenues, profits);	
+					} else {
+						renderLineChart(revenues);	
+					}
+				}
+				fetch(`/statistics/dateToDatePaging/1`, {
+					method: 'POST',
+					headers: { 
+						'Content-Type': 'application/json', 
+						'Authorization': `Bearer ${jwt}`
+					},
+					body: JSON.stringify({ startDate, endDate })
+				})
+				.then(res => res.json())
+				.then(data => {
+					renderUI(data.orders);
+					$("#prevBtn").prop("disabled", false);
+					$("#nextBtn").prop("disabled", false);
+					if(data.pageNum > 0) {
+						currentPage = 1;
+						$("#curPage").text(currentPage);
+						$("#pageNum").text(data.pageNum);
+						$("#prevBtn").prop("disabled", true);
+						if(currentPage === data.pageNum) {
+							$("#nextBtn").prop("disabled", true);
+						}
+					} else {
+						$("#curPage").text('-');
+						$("#pageNum").text('-');
+						$("#prevBtn").prop("disabled", true);
+						$("#nextBtn").prop("disabled", true);
+					}
+					
+				})
+				.catch(err => console.log(err));
+			})
+			.catch(err => {
+				console.error(err);
+			})
+		}
+
+		$('#reportrange').daterangepicker({
+			startDate: start,
+			endDate: end,
+			ranges: {
+				'Hôm nay': [moment(), moment()],
+				'Hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+				'7 ngày gần nhất': [moment().subtract(6, 'days'), moment()],
+				'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+				'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+			}
+		}, cb);
+
+		cb(start, end);
+
+		$('#tbody-history').on('click', '.btn-detail', function() {
+			const id = $(this).closest('tr').data('id');
+			fetch(`/selling/order/${id}`, {
+				headers: {
+					"Authorization": `Bearer ${jwt}`
+				}
+			})
+			.then(res => {
+				if(res.status !== 200) throw new Error();
+				return res.json();
+			})
+			.then(data => {
+				console.log(data);
+				let trs = ``;
+				data.forEach(order => {
+					const name = order.product.isPhone ? `${order.product.name} ${order.product.color} ${order.product.ram}GB ${order.product.rom}GB` : order.product.name;
+					trs += `
+						<tr>
+							<td class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 total-price-cart">${name}</h6>
+							</td>
+							<td class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 total-price-cart">${order.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h6>
+							</td>
+							<td class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 total-price-cart">${order.quantity}</h6>
+							</td>
+						</tr>`
+
+
+				})
+				let htmls = `<div>
+					<table class="table table-bordered">
+						<thead>
+						<tr>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 text-primary">Tên điện thoại</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 text-primary">Giá</h6>
+							</th>
+							<th class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 text-primary">Số lượng</h6>
+							</th>
+						</tr>
+						</thead>
+						<tbody>
+							${trs}
+						</tbody>
+					</table>
+				</div>`;
+				Swal.fire({
+					title: "Chi tiết",
+					width: 'auto',
+					customClass: 'sweet-width',
+					html: htmls,
+					icon: "info",
+				});
+			})
+			.catch(err => {
+				console.error(err);
+			})
+		})	
+	});
+
+	function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
+                // Trả về giá trị của cookie
+                return cookie.substring(name.length + 1);
+            }
+        }
+        // Trả về null nếu không tìm thấy cookie
+        return null;
+    }
+
+	function renderUI(orders) {
+		let trs = ``;
+		$('#tbody-history').empty();
+		orders.forEach((item, index) => {
+			const dateCheckout = moment(item.dateCheckout).locale('vi').format('DD-MM-YYYY');
+			trs +=  `<tr data-id=${item._id}>
+				<td class="border-bottom-0"><h6 class="fw-semibold mb-0">${index + 1}</h6></td>
+				<td class="border-bottom-0 text-wrap">
+					<h6 class="fw-semibold mb-0">${item._id}</h6>                        
+				</td>
+				<td class="border-bottom-0">
+					<h6 class="fw-semibold mb-0">${dateCheckout}</h6>
+				</td>
+
+				<td class="border-bottom-0">
+					<h6 class="fw-semibold mb-0 price-cart">${item.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h6>
+				</td>
+				<td class="border-bottom-0">
+					<h6 class="fw-semibold mb-0 total-price-cart">${item.moneyGiven.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h6>
+				</td>
+				<td class="border-bottom-0">
+					<h6 class="fw-semibold mb-0 total-price-cart">${item.moneyBack.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</h6>
+				</td>
+				<td class="border-bottom-0">
+					<button class="btn btn-success mb-0 btn-detail">Chi tiết</button>
+				</td>
+			</tr>`;
+		})
+		if(trs !== ``) {
+			$('#tbody-history').append(trs);
+		}
+	}
+	var barChart = null;
+	function renderChart(revenues, dates, profit) {
+		$('#statistics-chart').removeClass('d-none');
+		$('#statistics-linechart').addClass('d-none');
+		const max = profit ? (Math.max(...profit) > Math.max(...revenues) ?  Math.max(...profit) : Math.max(...revenues)) : Math.max(...revenues);
+		var chart = {
+			series: [
+				{ name: "Doanh thu:", data: revenues },
+				{ name: "Lợi nhuận:", data: profit },
+			],
+
+			chart: {
+				type: "bar",
+				height: 345,
+				offsetX: -15,
+				toolbar: { show: true },
+				foreColor: "#adb0bb",
+				fontFamily: 'inherit',
+				sparkline: { enabled: false },
+			},
+
+
+			colors: ["#13DEB9", "#FA896B"],
+
+
+			plotOptions: {
+				bar: {
+					horizontal: false,
+					columnWidth: "35%",
+					borderRadius: [6],
+					borderRadiusApplication: 'end',
+					borderRadiusWhenStacked: 'all'
+				},
+			},
+			markers: { size: 0 },
+
+			dataLabels: {
+				enabled: false,
+			},
+
+
+			legend: {
+				show: false,
+			},
+
+
+			grid: {
+				borderColor: "rgba(0,0,0,0.1)",
+				strokeDashArray: 3,
+				xaxis: {
+					lines: {
+					show: false,
+					},
+				},
+			},
+
+			xaxis: {
+				type: "category",
+				categories: dates,
+				labels: {
+					style: { cssClass: "grey--text lighten-2--text fill-color" },
+				},
+			},
+
+
+			yaxis: {
+				show: true,
+				min: 0,
+				max: max,
+				tickAmount: 4,
+				labels: {
+					formatter: function (value) {
+						// Định dạng số tiền theo tiêu chuẩn tiền Việt
+						return value.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+					},
+					style: {
+						cssClass: "grey--text lighten-2--text fill-color",
+					},
+				},
+			},
+			stroke: {
+				show: true,
+				width: 3,
+				lineCap: "butt",
+				colors: ["transparent"],
+			},
+
+
+			tooltip: { theme: "light" },
+
+			responsive: [
+				{
+					breakpoint: 600,
+					options: {
+						plotOptions: {
+							bar: {
+								borderRadius: 3,
+							}
+						},
+					}
+				}
+			]
+
+
+		};
+		if(barChart === null) {
+			barChart = new ApexCharts(document.querySelector("#statistics-chart"), chart);
+			barChart.render();
+		} else {
+			barChart.updateOptions(chart);
+		}
+	}
+	var lineChart = null;
+	function renderLineChart(revenues, profits) {
+		$('#statistics-chart').addClass('d-none');
+		$('#statistics-linechart').removeClass('d-none');
+		var earning = {
+			chart: {
+				type: "line",
+				height: 360,
+				fontFamily: "Plus Jakarta Sans', sans-serif",
+				foreColor: "#adb0bb",
+			},
+			series: [
+				{
+					name: "Doanh thu",
+					color: "#13DEB9",
+					data: revenues,
+				},
+				{
+					name: "Lợi nhuận",
+					color: "#FA896B",
+					data: profits
+				}
+			],
+			dataLabels: {
+				enabled: false
+			},
+			stroke: {
+				curve: "smooth",
+				width: 2,
+			},
+			
+			grid: {
+				row: {
+					colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+					opacity: 0.5
+				},
+			},
+			xaxis: {
+				categories: [],
+			},
+			yaxis: {
+				labels: {
+					formatter: function (value) {
+						// Định dạng số tiền theo tiêu chuẩn tiền Việt
+						return value.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+					},
+				}
+				
+			}
+		};
+		if(lineChart === null) {
+			lineChart = new ApexCharts(document.querySelector("#statistics-linechart"), earning);
+			lineChart.render();
+		} else {
+			lineChart.updateOptions(earning);
+		}
+		
+	}	
+</script>

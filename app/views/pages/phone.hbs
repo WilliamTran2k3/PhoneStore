@@ -1,0 +1,722 @@
+<div class="col-md-5 mx-auto mb-4">
+	<form action="/product/search">
+		<div class="input-group">
+			<input class="form-control border-end-0 border" type="text" placeholder="Tên điện thoại" id="search-input" name="keyword">
+			<span class="input-group-append">
+				<button class="btn btn-outline-secondary bg-white border-start-0 border-bottom-0 border ms-n4" type="submit">
+					<i class="ti ti-search"></i>
+				</button>
+			</span>
+		</div>
+	</form>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+	<div class="d-flex justify-content-start">
+		<button class="btn border me-2 btn-success btn-filter">Tất cả</button>
+		{{#each category}}
+			<button class="btn border me-2 btn-filter" data-id="{{_id}}">{{name}}</button>
+		{{/each}}
+	</div>
+	{{#ifEquals user.role 'ROLE ADMIN'}}
+		<div>
+			<button class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#addPhone">Thêm điện thoại</button>
+			<button class="btn btn-warning btn-export-barcode">Xuất mã vạch</button>
+		</div>
+	{{/ifEquals}}
+</div>
+
+<div class="row mb-5 container-phones">
+{{#each product}}
+	<div class="col-sm-6 col-lg-3 mb-4" data-aos="fade-up">
+		<div class="block-4 text-center border shadow-lg position-relative phone-item" data-id="{{_id}}" data-category="{{category}}">
+			<figure class="block-4-image p-3">
+				<a href="#">
+					<img src="/images/product/{{image}}" alt="Image placeholder" class="img-fluid" style="max-height: 250px">
+				</a>
+			</figure>
+			<div class="block-4-text px-3 pb-3 text-start">
+				<h3 class="mb-3 w-100" >
+					<a href="#"><span class="text-name-phone">{{name}}</span> <span class="text-color-phone">{{color}}</span> <span class="text-ram-phone">{{ram}}</span>GB <span class="text-rom-phone">{{rom}}</span>GB</a>
+				</h3>
+				{{#ifEquals ../user.role 'ROLE ADMIN'}}
+					<p class="text-primary font-weight-bold mb-1">Giá gốc: <span class="text-danger text-price-phone">{{formatMoney price}}</span></p>
+				{{/ifEquals}}
+				<p class="text-primary font-weight-bold">Giá bán: <span class="text-warning text-retail-price-phone">{{formatMoney retailPrice}}</span></p>
+			</div>
+			{{#ifEquals ../user.role 'ROLE ADMIN'}}
+				<div class="position-absolute d-flex" style="top: 0.5rem; right: 0.2rem">
+					<div class="edit-phone bg-success text-white cursor-pointer d-flex justify-content-center align-items-center rounded-circle me-1" style="width: 30px; height: 30px;">
+						<i class="ti ti-brush"></i>
+					</div>
+					<div class="remove-phone bg-danger text-white cursor-pointer d-flex justify-content-center align-items-center rounded-circle" style="width: 30px; height: 30px;">
+						<i class="ti ti-minus"></i>
+					</div>
+				</div>
+			{{/ifEquals}}
+		</div>
+	</div>
+{{/each}}
+</div>
+
+<div class="d-flex justify-content-center">
+	<button type="button" class="btn btn-info" id="prevBtn" disabled><i class="ti ti-chevron-left"></i></button>
+	<div class="border p-2 text-center" style="width: 80px;"><span id="curPage">1</span>/<span id="pageNum">{{pageNum}}</span></div>
+	<button type="button" class="btn btn-info" id="nextBtn"><i class="ti ti-chevron-right"></i></button>
+</div>
+
+{{!-- Modal thêm điện thoại --}}
+<div class="modal fade" id="addPhone">
+	<div class="modal-dialog">
+		<div class="modal-content">
+
+			<!-- Modal Header -->
+			<div class="modal-header justify-content-center">
+				<h4 class="modal-title">Thêm điện thoại mới</h4>
+			</div>
+
+			<!-- Modal body -->
+			<div class="modal-body">
+				<form id="form-new-phone">
+					<div class="mb-3">
+						<label for="name" class="form-label">Tên điện thoại</label>
+						<input type="text" class="form-control" id="name">
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Hãng</label>
+						<select class="form-select category">
+							<option disabled selected>Chọn hãng</option>
+							{{#each category}}
+								<option value="{{_id}}">{{name}}</option>
+							{{/each}}
+						</select>
+					</div>
+					<div class="new-varient">
+						<div class="mb-3">
+							<label class="form-label">Màu điện thoại</label>
+							<input type="text" class="form-control color-phone">
+						</div>
+						<div class="mb-3">
+							<label class="form-label">RAM</label>
+							<select class="form-select ram">
+								<option disabled selected>Chọn RAM</option>
+								<option value="2">2GB</option>
+								<option value="3">3GB</option>
+								<option value="4">4GB</option>
+								<option value="6">6GB</option>
+								<option value="8">8GB</option>
+								<option value="12">12GB</option>
+								<option value="16">16GB</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">ROM</label>
+							<select class="form-select rom">
+								<option disabled selected>Chọn ROM</option>
+								<option value="16">16GB</option>
+								<option value="32">32GB</option>
+								<option value="64">64GB</option>
+								<option value="128">128GB</option>
+								<option value="256">256GB</option>
+								<option value="512">512GB</option>
+								<option value="1024">1TB</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Giá</label>
+							<input type="text" class="form-control price-phone money-input">
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Giá niêm yết</label>
+							<input type="text" class="form-control retail-price-phone money-input">
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Ảnh minh họa</label>
+							<input type="file" class="form-control image-phone">
+						</div>
+					</div>
+					
+				</form>
+				<div class="d-flex justify-content-center">
+					<div class="rounded-circle bg-primary d-flex justify-content-center align-items-center text-white cursor-pointer" style="width: 30px; height: 30px" id="btn-varient">
+						<i class="ti ti-plus"></i>
+					</div>
+				</div>
+			</div>
+
+			<!-- Modal footer -->
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary btn-save">Lưu</button>
+				<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Đóng</button>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+{{!-- Modal sửa điện thoại --}}
+<div class="modal fade" id="editPhone">
+	<div class="modal-dialog">
+		<div class="modal-content">
+
+			<!-- Modal Header -->
+			<div class="modal-header justify-content-center">
+				<h4 class="modal-title">Sửa thông tin điện thoại</h4>
+			</div>
+
+			<!-- Modal body -->
+			<div class="modal-body">
+				<form>
+					<div class="mb-3">
+						<label for="name" class="form-label">Tên điện thoại</label>
+						<input type="text" class="form-control" id="name-edit">
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Hãng</label>
+						<select class="form-select category-edit">
+							<option disabled selected>Chọn hãng</option>
+							{{#each category}}
+								<option value="{{_id}}">{{name}}</option>
+							{{/each}}
+						</select>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Màu điện thoại</label>
+						<input type="text" class="form-control color-phone-edit">
+					</div>
+					<div class="mb-3">
+						<label class="form-label">RAM</label>
+						<select class="form-select ram-edit">
+							<option disabled selected>Chọn RAM</option>
+							<option value="2">2GB</option>
+							<option value="3">3GB</option>
+							<option value="4">4GB</option>
+							<option value="6">6GB</option>
+							<option value="8">8GB</option>
+							<option value="12">12GB</option>
+							<option value="16">16GB</option>
+						</select>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">ROM</label>
+						<select class="form-select rom-edit">
+							<option disabled selected>Chọn ROM</option>
+							<option value="16">16GB</option>
+							<option value="32">32GB</option>
+							<option value="64">64GB</option>
+							<option value="128">128GB</option>
+							<option value="256">256GB</option>
+							<option value="512">512GB</option>
+							<option value="1024">1TB</option>
+						</select>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Giá</label>
+						<input type="text" class="form-control price-phone-edit money-input">
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Giá niêm yết</label>
+						<input type="text" class="form-control retail-price-phone-edit money-input">
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Ảnh minh họa</label>
+						<input type="file" class="form-control image-phone-edit">
+					</div>
+				</form>
+			</div>
+
+			<!-- Modal footer -->
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary btn-edit">Lưu</button>
+				<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Đóng</button>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<script>
+	function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
+                // Trả về giá trị của cookie
+                return cookie.substring(name.length + 1);
+            }
+        }
+        // Trả về null nếu không tìm thấy cookie
+        return null;
+    }
+	$(function () {
+		var role = '{{user.role}}';
+		const jwt = getCookie('jwt');
+		if ({{pageNum}} == 1) {
+			$("#nextBtn").prop("disabled", true);
+		}
+		let currentPage = 1;
+		$("#nextBtn").click(function() {
+            currentPage++;
+            fetch(`/product/page/${currentPage}`)
+            .then(res => res.json())
+            .then(data => {
+                renderPhone(data.phones);
+                currentPage = data.page;
+                $("#curPage").text(currentPage);
+                $("#pageNum").text(data.pageNum);
+                $("#prevBtn").prop("disabled", false);
+                if (currentPage == data.pageNum) {
+                    $(this).prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+        $("#prevBtn").click(function() {
+            currentPage--;
+            fetch(`/product/page/${currentPage}`)
+            .then(res => res.json())
+            .then(data => {
+                renderPhone(data.phones);
+                currentPage = data.page;
+                $("#curPage").text(currentPage);
+                $("#pageNum").text(data.pageNum);
+                $("#nextBtn").prop("disabled", false);
+                if (currentPage == 1) {
+                    $("#prevBtn").prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+		$('.btn-filter').click(function() {
+			$('.btn-filter').removeClass('btn-success');
+			$(this).addClass('btn-success');
+			const idCategory = $(this).data('id');
+			fetch(`/product/filterByCategory/${idCategory}`, {
+				headers: {
+					'Authorization': `Bearer ${jwt}`
+				}
+			})
+				.then(res => res.json())
+				.then(data => renderPhone(data))
+				.catch(err => {
+					console.error(err);
+					Swal.fire({
+						title: "Lỗi",
+						text: "Đã có lỗi xảy ra",
+						icon: "error"
+					});
+				})
+		})
+
+		let numVarient = 1;
+		const newVarient = `
+		<div class="new-varient position-relative">
+			<hr class="my-4">
+			<div class="mb-3">
+				<label class="form-label">Màu điện thoại</label>
+				<input type="text" class="form-control color-phone">
+			</div>
+			<div class="mb-3">
+				<label class="form-label">RAM</label>
+				<select class="form-select ram">
+					<option disabled selected>Chọn RAM</option>
+					<option value="2">2GB</option>
+					<option value="3">3GB</option>
+					<option value="4">4GB</option>
+					<option value="6">6GB</option>
+					<option value="8">8GB</option>
+					<option value="12">12GB</option>
+					<option value="16">16GB</option>
+				</select>
+			</div>
+			<div class="mb-3">
+				<label class="form-label">ROM</label>
+				<select class="form-select rom">
+					<option disabled selected>Chọn ROM</option>
+					<option value="16">16GB</option>
+					<option value="32">32GB</option>
+					<option value="64">64GB</option>
+					<option value="128">128GB</option>
+					<option value="256">256GB</option>
+					<option value="512">512GB</option>
+					<option value="1024">1TB</option>
+				</select>
+			</div>
+			<div class="mb-3">
+				<label class="form-label">Giá</label>
+				<input type="text" class="form-control price-phone money-input">
+			</div>
+			<div class="mb-3">
+				<label class="form-label">Giá niêm yết</label>
+				<input type="text" class="form-control retail-price-phone money-input">
+			</div>
+			<div class="mb-3">
+				<label class="form-label">Ảnh minh họa</label>
+				<input type="file" class="form-control image-phone">
+			</div>
+			<div class="position-absolute end-0 bg-danger text-white cursor-pointer d-flex justify-content-center align-items-center rounded-circle btn-remove" style="width: 30px; height: 30px; top: 0.5rem;">
+				<i class="ti ti-minus"></i>
+			</div>
+		</div>`;
+		$('#btn-varient').click(() => {
+			$('#form-new-phone').append(newVarient);
+		})
+		$('#form-new-phone').on('click', '.btn-remove', function() {
+			$(this).closest('.new-varient').remove();
+		})
+		$('.btn-save').click(function() {
+			const name = $('#name').val();
+			const category = $('.category').val();
+			const formData = new FormData();
+			formData.append('type', 'product');
+			console.log($('.new-varient').length)
+			const phones = [];
+			$('.new-varient').each(function() {
+				const color = $(this).find('.color-phone').val();
+				const ram = $(this).find('.ram').val();
+				const rom = $(this).find('.rom').val();
+				const price = removeDotFormatting($(this).find('.price-phone').val());
+				const retailPrice = removeDotFormatting($(this).find('.retail-price-phone').val());
+				const file = $(this).find('.image-phone')[0].files[0];
+				console.log(file)
+				const imageName = Date.now() + '-' + Math.round(Math.random() * 1E9) + '.' + getFileExtension(file.name); 
+
+				const image = new File([file], imageName, {
+					type: file.type,
+				});
+				phones.push({
+					name, category, color, ram, rom, price, retailPrice, image: imageName
+				});
+        		formData.append('files', image); // Thêm file vào FormData
+			})
+			formData.append('phones', JSON.stringify(phones));
+			fetch('/product', {
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${jwt}`
+				},
+				body: formData
+			})
+				.then(res => {
+					if(res.status !== 201) throw new Error();
+					return res.json();
+				})
+				.then(data => {
+					Swal.fire({
+						title: "Thành công",
+						text: "Thêm điện thoại mới thành công",
+						icon: "success"
+					});
+					fetch(`/product/page/${currentPage}`, {
+						headers: {
+							'Authorization': `Bearer ${jwt}`
+						}
+					})
+					.then(res => res.json())
+					.then(data => {
+						currentPage = data.page;
+						$("#curPage").text(currentPage);
+						$("#pageNum").text(data.pageNum);
+						
+						if(currentPage === 1) {
+							$("#prevBtn").prop("disabled", true);
+						} else {
+							$("#prevBtn").prop("disabled", false);
+						}
+						if (currentPage === data.pageNum) {
+							$("#nextBtn").prop("disabled", true);
+						}
+						renderPhone(data.phones);
+					})
+				})
+				.catch(err => {
+					console.error(err);
+					Swal.fire({
+						title: "Thất bại",
+						text: "Thêm điện thoại mới thất bại",
+						icon: "error"
+					});
+				})
+		})
+		var idPhone = null;
+		$('.container-phones').on('click', '.edit-phone', function() {
+			idPhone = $(this).closest('.phone-item').data('id');
+			const name = $(this).closest('.phone-item').find('.text-name-phone').first().text();
+			const category = $(this).closest('.phone-item').data('category');
+			const color = $(this).closest('.phone-item').find('.text-color-phone').first().text();
+			const ram = $(this).closest('.phone-item').find('.text-ram-phone').first().text();
+			const rom = $(this).closest('.phone-item').find('.text-rom-phone').first().text();
+			const price = removeCurrencyFormatting($(this).closest('.phone-item')
+								.find('.text-price-phone').first().text());
+			const retailPrice = removeCurrencyFormatting($(this).closest('.phone-item')
+								.find('.text-retail-price-phone').first().text());
+			$('#name-edit').val(name);
+			$('.color-phone-edit').val(color);
+			$('.category-edit').val(category);
+			$('.ram-edit').find('option:contains(' + ram + ')').prop('selected', true);
+			$('.rom-edit').find('option:contains(' + rom + ')').prop('selected', true);
+			$('.price-phone-edit').val(price);
+			$('.retail-price-phone-edit').val(retailPrice);
+			$('#editPhone').modal('show');
+		})
+
+		$('.btn-edit').click(function() {
+			const name = $('#name-edit').val();
+			const category = $('.category-edit').val(); 
+			const color = $('.color-phone-edit').val();
+			const ram = $('.ram-edit').val();
+			const rom = $('.rom-edit').val();
+			const price = removeDotFormatting($('.price-phone-edit').val());
+			const retailPrice = removeDotFormatting($('.retail-price-phone-edit').val());
+			var imageName = null;
+			var image = null;
+			if ($('.image-phone-edit')[0].files.length > 0) {
+				const file = $('.image-phone-edit')[0].files[0];
+				imageName = Date.now() + '-' + Math.round(Math.random() * 1E9) + '.' + getFileExtension(file.name);
+				image = new File([file], imageName, {
+					type: file.type,
+				});
+			}
+			const formData = new FormData();
+			formData.append('type', 'product');
+			formData.append('name', name);
+			formData.append('category', category);
+			formData.append('color', color);
+			formData.append('ram', ram);
+			formData.append('rom', rom);
+			formData.append('price', price);
+			formData.append('retailPrice', retailPrice);
+			if(imageName !== null) {
+				formData.append('imageName', imageName);
+				formData.append('file', image);
+			}
+			fetch(`/product/${idPhone}`, {
+				method: 'PUT',
+				headers: {
+					'Authorization': `Bearer ${jwt}`
+				},
+				body: formData
+			})
+				.then(res => {
+					if(res.status !== 200) throw new Error();
+					return res.json();
+				})
+				.then(data => {
+					Swal.fire({
+						title: "Thành công",
+						text: "Thay đổi thông tin điện thoại thành công",
+						icon: "success"
+					});
+					fetch(`/product/page/${currentPage}`, {
+						headers: {
+							'Authorization': `Bearer ${jwt}`
+						}
+					})
+					.then(res => res.json())
+					.then(data => {
+						currentPage = data.page;
+						$("#curPage").text(currentPage);
+						$("#pageNum").text(data.pageNum);
+						
+						if(currentPage == 1) {
+							$("#prevBtn").prop("disabled", true);
+						} else {
+							$("#prevBtn").prop("disabled", false);
+						}
+						if (currentPage == data.pageNum) {
+							$("#nextBtn").prop("disabled", true);
+						}
+						renderPhone(data.phones);
+					})
+				})
+				.catch(err => {
+					console.error(err);
+					Swal.fire({
+						title: "Thất bại",
+						text: "Thay đổi thông tin điện thoại thất bại",
+						icon: "error"
+					});
+				})
+		});
+
+		$('.container-phones').on('click', '.remove-phone', function() {
+			const id = $(this).closest('.phone-item').data('id');
+			const name = $(this).closest('.phone-item').find('a').text();
+			const swalWithBootstrapButtons = Swal.mixin({
+				customClass: {
+					confirmButton: "btn btn-success ms-3",
+					cancelButton: "btn btn-danger"
+				},
+					buttonsStyling: false
+			});
+			swalWithBootstrapButtons.fire({
+				title: `Bạn có chắc xóa điện thoại ${name}?`,
+				text: "Thao tác này sẽ không thể hoàn tác!",
+				icon: "warning",
+				showCancelButton: true,
+				confirmButtonText: "Ok, Xóa!",
+				cancelButtonText: "Hủy!",
+				reverseButtons: true
+			}).then((result) => {
+				if (result.isConfirmed) {
+					fetch(`/product/${id}`, {
+						method: 'DELETE',
+						headers: {
+							'Authorization': `Bearer ${jwt}`
+						}
+					})
+					.then(res => {
+						if(res.status === 204) {
+							swalWithBootstrapButtons.fire({
+								title: "Thành công!",
+								text: "Đã xóa thành công",
+								icon: "success"
+							});
+							fetch(`/product/page/${currentPage}`, {
+								headers: {
+									'Authorization': `Bearer ${jwt}`
+								}
+							})
+							.then(res => res.json())
+							.then(data => {
+								currentPage = data.page;
+								$("#curPage").text(currentPage);
+								$("#pageNum").text(data.pageNum);
+								
+								if(currentPage == 1) {
+									$("#prevBtn").prop("disabled", true);
+								} else {
+									$("#prevBtn").prop("disabled", false);
+								}
+								if (currentPage == data.pageNum) {
+									$("#nextBtn").prop("disabled", true);
+								}
+								renderPhone(data.phones);
+							})
+						} else if(res.status === 400) {
+							swalWithBootstrapButtons.fire({
+								title: "Thất bại!",
+								text: "Không thể xóa vì sản phẩm đã tồn tại trong đơn hàng!",
+								icon: "error"
+							});
+						} else {
+							swalWithBootstrapButtons.fire({
+								title: "Thất bại!",
+								text: "Xóa không thành công",
+								icon: "error"
+							});
+						}
+					})
+					
+				} 
+			});
+		})
+		var zipName;
+		$('.btn-export-barcode').click(function() {
+			fetch('/product/exportBarcode', {
+				headers: {
+					'Authorization': `Bearer ${jwt}`
+				}
+			})
+			.then(res => {
+				if(res.ok) {
+					const disposition = res.headers.get('content-disposition');
+					const match = disposition.match(/filename="(.+)"/);
+					zipName = match ? match[1] : 'barcodes.zip'; 
+					return res.blob(); // Lấy dữ liệu từ response dưới dạng blob
+				} else {
+					throw new Error('Network response was not ok.');
+				}
+			})
+			.then(blobData => {
+				const url = window.URL.createObjectURL(new Blob([blobData]));
+				const link = document.createElement('a');
+				link.href = url;
+				link.setAttribute('download', zipName); // Tên file khi tải xuống
+				document.body.appendChild(link);
+				link.click();
+				link.remove();
+				Swal.fire({
+					title: "Thành công",
+					text: "Xuất mã vạch hoàn thành",
+					icon: "success"
+				});
+			})
+			.catch(err => {
+				console.error(err);
+				Swal.fire({
+					title: "Thất bại",
+					text: "Xuất mã vạch gặp lỗi",
+					icon: "error"
+				});
+			});
+		})
+		// Các hàm hỗ trợ
+
+		function getFileExtension(filename) {
+			return filename.slice((filename.lastIndexOf('.') - 1 >>> 0) + 2); // Lấy phần mở rộng của tệp tin
+		}
+
+		function removeCurrencyFormatting(currencyString) {
+		// Loại bỏ các ký tự không phải số và dấu phân cách
+			return currencyString.replace(/[^\d.,]/g, '');
+		}
+
+		function removeDotFormatting(currencyString) {
+			// Loại bỏ các ký tự không phải số và dấu phân cách
+			return currencyString.replace(/[^\d]/g, '');
+		}
+
+		$('.money-input').on('input', function() {
+			// Lấy giá trị nhập vào từ input
+			let input = $(this).val();
+
+			// Chuyển đổi giá trị nhập vào thành chuỗi có định dạng tiền tệ tiếng Việt
+			let formattedValue = new Intl.NumberFormat('vi-VN')
+								.format(Number(input.replace(/[^\d,]/g, ''))); 
+			// Gán giá trị đã định dạng trở lại vào input
+			$(this).val(formattedValue);
+		});
+
+		function renderPhone(phones) {
+			var phonesHtml = ``;
+			phones.forEach(phone => {
+				let editRemoveBtns = ``;
+				if(role === 'ROLE ADMIN') {
+					editRemoveBtns = `<div class="position-absolute d-flex" style="top: 0.5rem; right: 0.2rem">
+						<div class="edit-phone bg-success text-white cursor-pointer d-flex justify-content-center align-items-center rounded-circle me-1" style="width: 30px; height: 30px;">
+							<i class="ti ti-brush"></i>
+						</div>
+						<div class="remove-phone bg-danger text-white cursor-pointer d-flex justify-content-center align-items-center rounded-circle" style="width: 30px; height: 30px;">
+							<i class="ti ti-minus"></i>
+						</div>
+					</div>`;
+				}
+				const price = phone.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+				const retailPrice = phone.retailPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+				phonesHtml += `
+				<div class="col-sm-6 col-lg-3 mb-4 aos-init aos-animate" data-aos="fade-up">
+					<div class="block-4 text-center border shadow-lg position-relative phone-item" data-id="${phone._id}" data-category="${phone.category}">
+						<figure class="block-4-image p-3">
+							<a href="#">
+								<img src="/images/product/${phone.image}" alt="Image placeholder" class="img-fluid" style="max-height: 250px">
+							</a>
+						</figure>
+						<div class="block-4-text px-3 pb-3 text-start">
+							<h3 class="mb-3 w-100">
+								<a href="#"><span class="text-name-phone">${phone.name}</span> <span class="text-color-phone">${phone.color}</span> <span class="text-ram-phone">${phone.ram}</span>GB <span class="text-rom-phone">${phone.rom}</span>GB</a>
+							</h3>
+								<p class="text-primary font-weight-bold mb-1">Giá gốc: <span class="text-danger text-price-phone">${price}</span></p>
+							<p class="text-primary font-weight-bold">Giá bán: <span class="text-warning text-retail-price-phone">${retailPrice}</span></p>
+						</div>
+						${editRemoveBtns}
+					</div>
+				</div>`
+			});
+			$('.container-phones').empty().append(phonesHtml);
+
+		}
+	})
+</script>

@@ -1,0 +1,46 @@
+<div class="col-md-5 mx-auto mb-4">
+	<form action="/product/search">
+		<div class="input-group">
+			<input class="form-control border-end-0 border" type="text" value="{{keyword}}" id="search-input" name="keyword">
+			<span class="input-group-append">
+				<button class="btn btn-outline-secondary bg-white border-start-0 border-bottom-0 border ms-n4" type="submit">
+					<i class="ti ti-search"></i>
+				</button>
+			</span>
+		</div>
+	</form>
+</div>
+
+<h3 class="text-primary mb-3">Có <span class="text-danger">{{phones.length}}</span> kết quả tìm kiếm</h3>
+<div class="row mb-5 container-phones">
+{{#each phones}}
+	<div class="col-sm-6 col-lg-3 mb-4" data-aos="fade-up">
+		<div class="block-4 text-center border shadow-lg position-relative phone-item" data-id="{{_id}}" data-category="{{category}}">
+			<figure class="block-4-image p-3">
+				<a href="#">
+					<img src="/images/product/{{image}}" alt="Image placeholder" class="img-fluid" style="max-height: 250px">
+				</a>
+			</figure>
+			<div class="block-4-text px-3 pb-3 text-start">
+				<h3 class="mb-3 w-100" >
+					<a href="#"><span class="text-name-phone">{{name}}</span> <span class="text-color-phone">{{color}}</span> <span class="text-ram-phone">{{ram}}</span>GB <span class="text-rom-phone">{{rom}}</span>GB</a>
+				</h3>
+				{{#ifEquals ../user.role 'ROLE ADMIN'}}
+					<p class="text-primary font-weight-bold mb-1">Giá gốc: <span class="text-danger text-price-phone">{{formatMoney price}}</span></p>
+				{{/ifEquals}}
+				<p class="text-primary font-weight-bold">Giá bán: <span class="text-warning text-retail-price-phone">{{formatMoney retailPrice}}</span></p>
+			</div>
+			{{#ifEquals ../user.role 'ROLE ADMIN'}}
+				<div class="position-absolute d-flex" style="top: 0.5rem; right: 0.2rem">
+					<div class="edit-phone bg-success text-white cursor-pointer d-flex justify-content-center align-items-center rounded-circle me-1" style="width: 30px; height: 30px;">
+						<i class="ti ti-brush"></i>
+					</div>
+					<div class="remove-phone bg-danger text-white cursor-pointer d-flex justify-content-center align-items-center rounded-circle" style="width: 30px; height: 30px;">
+						<i class="ti ti-minus"></i>
+					</div>
+				</div>
+			{{/ifEquals}}
+		</div>
+	</div>
+{{/each}}
+</div>
