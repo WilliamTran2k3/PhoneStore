@@ -477,8 +477,9 @@
 			const name = $(this).closest('.phone-item').find('.text-name-phone').first().text();
 			const category = $(this).closest('.phone-item').data('category');
 			const color = $(this).closest('.phone-item').find('.text-color-phone').first().text();
-			const ram = $(this).closest('.phone-item').find('.text-ram-phone').first().text();
-			const rom = $(this).closest('.phone-item').find('.text-rom-phone').first().text();
+			const ram = $(this).closest('.phone-item').find('.text-ram-phone').first().text().replace(' GB', '');
+			const rom = $(this).closest('.phone-item').find('.text-rom-phone').first().text().replace(' GB', '');
+			console.log(ram, rom)
 			const price = removeCurrencyFormatting($(this).closest('.phone-item')
 								.find('.text-price-phone').first().text());
 			const retailPrice = removeCurrencyFormatting($(this).closest('.phone-item')

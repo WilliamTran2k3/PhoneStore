@@ -453,7 +453,7 @@
 								text: "Đã xóa thành công",
 								icon: "success"
 							});
-							fetch(`/product/page/${currentPage}/?accessory=true`, {
+							fetch(`/product/page/${currentPage}/${category}/?accessory=true`, {
 								headers: {
 									'Authorization': `Bearer ${jwt}`
 								}
