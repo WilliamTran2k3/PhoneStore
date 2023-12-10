@@ -1,14 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const upload = require("../app/middlewares/upload");
-const { verifyToken, verifyTokenAPIAdmin } = require('../app/middlewares/verifyToken');
+const { verifyToken, verifyTokenAPIAdmin, verifyTokenAdmin } = require('../app/middlewares/verifyToken');
+const { checkChangePassword } = require('../app/middlewares/changePassword');
 
 const accountController = require('../app/controllers/AccountController');
 
-router.get('/', verifyToken, accountController.accountsPage);
-router.get('/profile', verifyToken, accountController.profile);
+router.get('/', verifyTokenAdmin, accountController.accountsPage);
+router.get('/profile', verifyToken, checkChangePassword, accountController.profile);
 router.get('/search', accountController.search);
-router.get('/:id', verifyToken, accountController.accountDetailPage);
+router.get('/:id', verifyTokenAdmin, accountController.accountDetailPage);
+router.get('/order/:id/page/:page', accountController.orderPagination);
 router.get('/page/:page', accountController.pagination);
 router.post('/', verifyTokenAPIAdmin, accountController.addAccount);
 router.put('/', verifyTokenAPIAdmin, accountController.resendEmail);

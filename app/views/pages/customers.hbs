@@ -1,26 +1,25 @@
-<div class="d-flex mb-4 align-items-center">
-    <div class="fs-5 fw-bold me-5">Customers</div>
-    <div class="input-group w-25">
-        <label for="searchInput" class="input-group-text"><i class="ti ti-search"></i></label>
-        <input type="search" id="searchInput" class="form-control" placeholder="Search by phone number">
+<div class="d-flex align-items-center justify-content-between gap-5">
+    <h3 style="white-space: nowrap;">Khách hàng</h3>
+    <div class="input-group w-50">
+        <input type="search" id="searchInput" class="form-control" placeholder="Tìm theo số điện thoại khách hàng">
+        <button type="button" class="btn btn-primary" id="searchBtn"><i class="ti ti-search"></i></button>
     </div>
-    
+    <div class="d-flex gap-2 align-items-center justify-content-center">
+        <button type="button" class="btn btn-info" id="prevBtn" disabled><i class="ti ti-chevron-left"></i></button>
+        <div class="border p-2 text-center" style="width: 80px;"><span id="curPage">1</span>/<span id="pageNum">{{pageNum}}</span></div>
+        <button type="button" class="btn btn-info" id="nextBtn"><i class="ti ti-chevron-right"></i></button>
+    </div>
 </div>
 
 <table class="table table-hover">
     <thead>
         <tr>
-            <th scope="col">Phone number</th>
-            <th scope="col">Name</th>
-            <th scope="col">Address</th>
+            <th scope="col">Số điện thoại</th>
+            <th scope="col">Tên</th>
+            <th scope="col">Địa chỉ</th>
         </tr>
     </thead>
-    <tbody>
-        <tr style="cursor: pointer;" class="clickable-row" data-phone="phone">
-            <th scope="row">phone</th>
-            <td>name</td>
-            <td>address</td>
-        </tr>
+    <tbody class="customer-container">
         {{#each customers}}
         <tr style="cursor: pointer;" class="clickable-row" data-phone="{{phone}}">
             <th scope="row">{{phone}}</th>
@@ -32,9 +31,92 @@
 </table>
 
 <script>
-    $('.clickable-row').click(function() {
-        console.log('click')
-        const phone = $(this).data('phone');
-        window.location.href = `/customer/${phone}`;
+    var currentPage = 1;
+
+    if ({{pageNum}} == 1) {
+        $("#nextBtn").prop("disabled", true);
+    }
+
+    $(function() {
+        $('.customer-container').on('click', '.clickable-row', function() {
+            const phone = $(this).data('phone');
+            window.location.href = `/customer/${phone}`;
+        });
+
+        $("#nextBtn").click(function() {
+            currentPage++;
+            fetch(`/customer/page/${currentPage}`)
+            .then(res => res.json())
+            .then(data => {
+                $(".customer-container").empty();
+                for (const customer of data.customers) {
+                    $(".customer-container").append(customerRow(customer));
+                }
+                currentPage = data.page;
+                $("#curPage").text(currentPage);
+                $("#pageNum").text(data.pageNum);
+                $("#prevBtn").prop("disabled", false);
+                if (currentPage == data.pageNum) {
+                    $(this).prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+        $("#prevBtn").click(function() {
+            currentPage--;
+            fetch(`/customer/page/${currentPage}`)
+            .then(res => res.json())
+            .then(data => {
+                $(".customer-container").empty();
+                for (const customer of data.customers) {
+                    $(".customer-container").append(customerRow(customer));
+                }
+                currentPage = data.page;
+                $("#curPage").text(currentPage);
+                $("#pageNum").text(data.pageNum);
+                $("#nextBtn").prop("disabled", false);
+                if (currentPage == 1) {
+                    $("#prevBtn").prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+        $("#searchBtn").click(function () {
+            const phone = $("#searchInput").val();
+            fetch(`/customer/search?phone=${phone}`)
+            .then(res => res.json())
+            .then(data => {
+                $(".customer-container").empty();
+                for (const customer of data.customers) {
+                    $(".customer-container").append(customerRow(customer));
+                }
+                if (phone != '') {
+                    $("#prevBtn").prop("disabled", true);
+                    $("#nextBtn").prop("disabled", true);
+                    $("#curPage").text("-");
+                    $("#pageNum").text("-");
+                } else {
+                    $("#nextBtn").prop("disabled", false);
+                    $("#curPage").text(1);
+                    $("#pageNum").text(data.pageNum);
+                }
+                if (data.pageNum == 1) {
+                    $("#nextBtn").prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
     });
+
+    function customerRow(data) {
+        return `
+            <tr style="cursor: pointer;" class="clickable-row" data-phone="${data.phone}">
+                <th scope="row">${data.phone}</th>
+                <td>${data.name}</td>
+                <td>${data.address}</td>
+            </tr>
+        `;
+    }
 </script>

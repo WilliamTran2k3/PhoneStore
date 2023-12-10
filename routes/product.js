@@ -6,13 +6,13 @@ const { verifyToken, verifyTokenAPI, verifyTokenAPIAdmin } = require('../app/mid
 const { checkChangePassword } = require("../app/middlewares/changePassword");
 
 // Thêm sửa xóa phone
-router.get('/', verifyToken, productController.homePage);
+router.get('/', verifyToken, checkChangePassword, productController.homePage);
 router.post('/', verifyTokenAPIAdmin, upload.array('files', 10), productController.addNew);
 router.put('/:id', verifyTokenAPIAdmin, upload.single('file'), productController.editPhone);
 router.delete('/:id', verifyTokenAPIAdmin, productController.deletePhone);
 router.get('/search', productController.search);
 router.get('/getAll', productController.getAll);
-router.get('/page/:pageNum', productController.getByPage);
+router.get('/page/:page/:idCategory', productController.getByPage);
 router.post('/getAllByIds', productController.getPhoneByIds);
 // Xuất barcode
 // router.get('/exportBarcode', verifyTokenAPIAdmin, productController.exportBarcodes);

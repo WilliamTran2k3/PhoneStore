@@ -15,10 +15,13 @@ class AccountController {
         }
         const users = await User.find({ role: ROLES.Staff })
             .sort({ _id: -1 })
-            .limit(15)
+            .limit(10)
             .lean();
         const usersNum = await User.countDocuments();
-        const pageNum = Math.ceil((usersNum-1)/15);
+        let pageNum = Math.ceil((usersNum-1)/10);
+        if (pageNum == 0) {
+            pageNum++;
+        }
         return res.render('accounts', {
             layout: 'layout',
             title: 'Quản lý nhân viên',
@@ -32,17 +35,22 @@ class AccountController {
         const user = req.session.user;
         const orders = await Order.find({ user: user._id })
             .populate("customer")
-            .populate("orderDetails.phone")
+            .populate("orderDetails.product")
             .sort({ createdAt: 'desc' })
+            .limit(10)
             .lean();
-            
-        console.log(orders);
+        const ordersNum = await Order.countDocuments({ user: user._id });
+        let pageNum = Math.ceil(ordersNum/10);
+        if (pageNum == 0) {
+            pageNum++;
+        }
         return res.render('userDetail', {
             layout: 'layout',
-            title: 'Chi tiết nhân viên',
+            title: 'Thông tin tài khoản',
             user,
             staff: user,
             orders,
+            pageNum,
         });
     }
 
@@ -53,21 +61,26 @@ class AccountController {
             return res.redirect("/");
         }
         const staff = await User.findById(staffId)
-            .populate("orders")
             .lean();
 
         const orders = await Order.find({ user: staffId })
             .populate("customer")
-            .populate("orderDetails.phone")
+            .populate("orderDetails.product")
             .sort({ createdAt: 'desc' })
+            .limit(10)
             .lean();
-
+            const ordersNum = await Order.countDocuments({ user: staffId });
+        let pageNum = Math.ceil(ordersNum/10);
+        if (pageNum == 0) {
+            pageNum++;
+        }
         return res.render('userDetail', {
             layout: 'layout',
             title: 'Chi tiết nhân viên',
             user,
             staff,
             orders,
+            pageNum,
         });
     }
 
@@ -75,12 +88,33 @@ class AccountController {
         const page = req.params.page;
         const users = await User.find({ role: ROLES.Staff })
             .sort({ _id: -1 })
-            .skip((page - 1) * 15)
-            .limit(15)
+            .skip((page - 1) * 10)
+            .limit(10)
             .lean();
         const usersNum = await User.countDocuments();
-        const pageNum = Math.ceil((usersNum-1)/15);
+        let pageNum = Math.ceil((usersNum-1)/10);
+        if (pageNum == 0) {
+            pageNum++;
+        }
         return res.status(200).json({ users, page, pageNum });
+    }
+
+    async orderPagination(req, res) {
+        const id = req.params.id;
+        const page = req.params.page;
+        const orders = await Order.find({ user: id })
+            .populate("customer")
+            .populate("orderDetails.product")
+            .sort({ createdAt: 'desc' })
+            .skip((page - 1) * 10)
+            .limit(10)
+            .lean();
+        const ordersNum = await Order.countDocuments({ user: id });
+        let pageNum = Math.ceil(ordersNum/10);
+        if (pageNum == 0) {
+            pageNum++;
+        }
+        return res.status(200).json({ orders, page, pageNum });
     }
 
     async search(req, res) {
@@ -89,7 +123,10 @@ class AccountController {
             .sort({ _id: -1 })
             .lean();
         const usersNum = await User.countDocuments();
-        const pageNum = Math.ceil((usersNum-1)/15);
+        let pageNum = Math.ceil((usersNum-1)/10);
+        if (pageNum == 0) {
+            pageNum++;
+        }
         return res.status(200).json({ users, pageNum });
     }
 
@@ -115,7 +152,7 @@ class AccountController {
         const userObj = savedUser.toObject();
         delete userObj.password;
         const usersNum = await User.countDocuments();
-        const pageNum = Math.ceil((usersNum-1)/15);
+        const pageNum = Math.ceil((usersNum-1)/10);
         return res.status(201).json({ userObj, pageNum});
     }
 
@@ -200,7 +237,7 @@ class AccountController {
 
     async deleteAccount(req, res) {
         const userId = req.params.id;
-        const page = req.params.page;
+        let page = req.params.page;
         const user = await User.findById(userId);
         const name = user.fullname;
         if (user.avatar != 'user.jpg') {
@@ -209,21 +246,24 @@ class AccountController {
             fs.unlinkSync(filePath);
         }
         await user.deleteOne();
-        const users = await User.find({ role: ROLES.Staff })
+        let users = await User.find({ role: ROLES.Staff })
             .sort({ _id: -1 })
-            .skip((page - 1) * 15)
-            .limit(15)
+            .skip((page - 1) * 10)
+            .limit(10)
             .lean();
         if (users.length == 0) {
             page--;
             users = await User.find({ role: ROLES.Staff })
             .sort({ _id: -1 })
-            .skip((page - 1) * 15)
-            .limit(15)
+            .skip((page - 1) * 10)
+            .limit(10)
             .lean();
         }
         const usersNum = await User.countDocuments();
-        const pageNum = Math.ceil((usersNum-1)/15);
+        let pageNum = Math.ceil((usersNum-1)/10);
+        if (pageNum == 0) {
+            pageNum++;
+        }
         return res.status(200).json({ success: "Đã xóa tài khoản nhân viên "+name, users, page, pageNum });
     }
 }

@@ -168,7 +168,7 @@
 
 <script>
 	$(function() {
-		const cartText = JSON.parse(localStorage.getItem('cartText'));
+		const cartText = JSON.parse(localStorage.getItem('cartText')) || [];
 		console.log(cartText)
 		var role = "{{user.role}}";
 		console.log(role);
@@ -324,6 +324,7 @@
 								$('#address').val('');
 								$('#name').removeAttr('readonly');
 								$('#address').removeAttr('readonly');
+								$('#tbody-history').empty();
 							} else {
 								isNew = false;
 								customerId = data._id;

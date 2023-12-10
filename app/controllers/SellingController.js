@@ -58,13 +58,15 @@ class SellingController {
 	async detailOrder(req, res) {
 		try {
 			const id = req.params.id;
-			const order = await Order.findById(id).lean();
+			const order = await Order.findById(id)
+				.populate('orderDetails.product')
+				.lean();
 			var orderDetails = order.orderDetails;
-			for (let i = 0; i < orderDetails.length; i++) {
-				const productId = orderDetails[i].product;
-				const productDetails = await Product.findById(productId).lean();
-				order.orderDetails[i].product = productDetails;
-			}
+			// for (let i = 0; i < orderDetails.length; i++) {
+			// 	const productId = orderDetails[i].product;
+			// 	const productDetails = await Product.findById(productId).lean();
+			// 	order.orderDetails[i].product = productDetails;
+			// }
 
 			return res.status(200).json(orderDetails);
 

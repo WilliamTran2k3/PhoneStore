@@ -14,6 +14,7 @@
 			</div>	
 		</div>
 	</div>
+	{{#ifEquals user.role "ROLE ADMIN"}}
 	<div class="col">
 		<div class="card bg-danger text-white text-center">
 			<div class="card-body p-4">
@@ -22,6 +23,7 @@
 			</div>	
 		</div>
 	</div>
+	{{/ifEquals}}
 </div>
 
 <div class="row mb-5">

@@ -74,7 +74,6 @@ class AuthController {
         const token = req.query.token;
         const user = await User.findOne({ emailToken: token });
         if (user) {
-            console.log(new Date().getMinutes());
             const expirationTime = 60 * 1000;
             const currentTime = new Date().getTime();
             const timeDiff = currentTime - user.updatedAt.getTime();
@@ -86,8 +85,8 @@ class AuthController {
                 user.verified = true;
                 user.emailToken = null;
                 const savedUser = await user.save();
-                const token = jwt.sign({ username: savedUser.username }, process.env.JWT_SECRET);
-                res.cookie('jwt', token, { maxAge: 60 * 60 * 1000, httpOnly: true });
+                const token = jwt.sign({ userId: savedUser._id }, process.env.JWT_SECRET);
+                res.cookie('jwt', token, { maxAge: 60 * 60 * 1000, httpOnly: false });
                 return res.redirect("/");
             }
         } else {

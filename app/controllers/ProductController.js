@@ -20,10 +20,8 @@ class ProductController {
 		}
 		const product = await Product.find({ isPhone: isPhone }).limit(8).lean();
 		var numProduct = await Product.countDocuments({ isPhone: isPhone });
-		if (numProduct < 2) {
-			numProduct++;
-		}
-		const pageNum = Math.ceil((numProduct - 1) / 8);
+		
+		const pageNum = Math.ceil((numProduct) / 8);
 		const category = await Category.find().lean();
 		return res.render(pageRender, {
 			layout: 'layout',
@@ -157,12 +155,14 @@ class ProductController {
 
 	async search(req, res) {
 		try {
+			const user = req.session.user;
 			const keyword = req.query.keyword;
-			const phones = await Product.find({ name: { $regex: keyword, $options: 'i' }, isPhone: true }).lean();
+			const phones = await Product.find({ name: { $regex: keyword, $options: 'i' } }).lean();
 			res.render('search', {
 				layout: 'layout',
 				phones,
 				keyword,
+				user,
 				title: 'Kết quả tìm kiếm',
 			});
 		} catch (err) {
@@ -257,47 +257,47 @@ class ProductController {
 	};
 
 	async exportBarcodesTest(req, res) {
-	try {
-		const accessory = req.query.accessory;
-		const isPhone = !accessory;
+		try {
+			const accessory = req.query.accessory;
+			const isPhone = !accessory;
 
-		const products = await Product.find({ isPhone });
+			const products = await Product.find({ isPhone });
 
-		const archive = archiver('zip', {
-			zlib: { level: 9 } // Mức độ nén 
-		});
+			const archive = archiver('zip', {
+				zlib: { level: 9 } // Mức độ nén 
+			});
 
-		// Pipe file ZIP vào response
-		archive.pipe(res);
+			// Pipe file ZIP vào response
+			archive.pipe(res);
 
-		products.forEach((product, index) => {
-			const barcodeImage = product.barcode;
+			products.forEach((product, index) => {
+				const barcodeImage = product.barcode;
 
-			if (barcodeImage) {
-				const buffer = Buffer.from(barcodeImage, 'base64');
-				let name = product.name;
+				if (barcodeImage) {
+					const buffer = Buffer.from(barcodeImage, 'base64');
+					let name = product.name;
 
-				if (isPhone) {
-					name = `${product.name}_${product.color}_${product.ram}GB_${product.rom}GB`;
+					if (isPhone) {
+						name = `${product.name}_${product.color}_${product.ram}GB_${product.rom}GB`;
+					}
+
+					// Thêm tệp tin vào file ZIP
+					archive.append(buffer, { name: `${name}.png` });
 				}
+			});
 
-				// Thêm tệp tin vào file ZIP
-				archive.append(buffer, { name: `${name}.png` });
-			}
-		});
+			// Kết thúc file ZIP và gửi cho người dùng
+			archive.finalize();
 
-		// Kết thúc file ZIP và gửi cho người dùng
-		archive.finalize();
-
-		// Đặt header cho response là file ZIP
-		var zipName = isPhone ? 'barcodes_phone.zip' : 'barcodes_accessory.zip';
-		res.attachment(zipName);
-		res.status(200);
-	} catch (err) {
-		console.error('Lỗi khi lấy hình ảnh mã vạch:', err);
-		res.status(500).json({ error: err });
+			// Đặt header cho response là file ZIP
+			var zipName = isPhone ? 'barcodes_phone.zip' : 'barcodes_accessory.zip';
+			res.attachment(zipName);
+			res.status(200);
+		} catch (err) {
+			console.error('Lỗi khi lấy hình ảnh mã vạch:', err);
+			res.status(500).json({ error: err });
+		}
 	}
-}
 
 
 	async getPhoneByIds(req, res) {
@@ -317,16 +317,19 @@ class ProductController {
 			if(accessory) {
 				isPhone = false;
 			}
-			const page = req.params.pageNum;
-			const phones = await Product.find({ isPhone: isPhone })
+			const { page, idCategory } = req.params;
+			console.log(idCategory)
+			const filter = idCategory != -1 ? {
+				isPhone: isPhone, category: idCategory 
+			} : {
+				isPhone: isPhone,
+			}
+			const phones = await Product.find(filter)
 				.skip((page - 1) * 8)
 				.limit(8)
 				.lean();
-			var phonesNum = await Product.countDocuments({ isPhone: isPhone });
-			if (phonesNum < 2) {
-				phonesNum++;
-			}
-			const pageNum = Math.ceil((phonesNum - 1) / 8);
+			var phonesNum = await Product.countDocuments(filter);
+			const pageNum = Math.ceil((phonesNum) / 8);
 			return res.status(200).json({ phones, page, pageNum });
 		} catch (err) {
 			console.error(err);

@@ -1,0 +1,288 @@
+<div class="d-flex justify-content-end mb-3">
+	<button class="btn btn-primary btn-add">Thêm loại mới</button>
+</div>
+<div class="card w-100">
+	<div class="card-body p-4">
+		<h5 class="card-title fw-semibold mb-4">Danh mục loại sản phẩm</h5>
+		<div class="table-responsive">
+			<table class="table text-nowrap mb-0 align-middle table-striped text-center">
+				<thead class="text-dark fs-4">
+					<tr>
+						<th class="border-bottom-0">
+							<h6 class="fw-semibold mb-0">STT</h6>
+						</th>
+						<th class="border-bottom-0">
+							<h6 class="fw-semibold mb-0">Tên</h6>
+						</th>
+						<th class="border-bottom-0">
+							<h6 class="fw-semibold mb-0">Thao tác</h6>
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					{{#each categories}} 
+						<tr>
+							<td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{increaseOne @index}}</h6></td>
+							<td class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 fs-4 name-category">{{name}}</h6>
+							</td>
+							<td class="border-bottom-0">
+								<div class="d-flex align-items-center gap-2 justify-content-center">
+									<span class="badge bg-primary rounded-3 fw-semibold me-2 cursor-pointer btn-edit" data-id="{{_id}}">Chỉnh sửa</span>
+									<span class="badge bg-danger rounded-3 fw-semibold cursor-pointer btn-remove" data-id="{{_id}}">Xóa</span>
+								</div>
+							</td>
+						</tr> 
+					{{/each}}    
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+
+<!-- Modal Add -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="categoryModalLabel">Thêm danh mục</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="name" class="form-label">Tên danh mục mới</label>
+            <input type="text" class="form-control" id="name">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-primary" id="categorySave">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="categoryModalEdit" tabindex="-1" aria-labelledby="categoryModalEditLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="categoryModalEditLabel">Sửa danh mục</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label for="oldName" class="form-label">Tên danh mục mới</label>
+            <input type="text" class="form-control" id="oldName">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-primary" id="categoryEdit">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+	$(function() {
+		function getCookie(name) {
+			const cookies = document.cookie.split(';');
+			for (let i = 0; i < cookies.length; i++) {
+				const cookie = cookies[i].trim();
+				if (cookie.startsWith(name + '=')) {
+					// Trả về giá trị của cookie
+					return cookie.substring(name.length + 1);
+				}
+			}
+			// Trả về null nếu không tìm thấy cookie
+			return null;
+		}
+		const jwt = getCookie("jwt");
+		$('.btn-add').click(function() {
+			$('#categoryModal').modal('show');
+		})
+		var idCategory = null;
+		var tdName = null;
+		$('#categoryEdit').click(function() {
+			const name = $('#oldName').val();
+			if(name.trim() !== "") {
+				fetch(`/category/${idCategory}`, {
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${jwt}`
+					},
+					body: JSON.stringify({ name })
+				})
+				.then(res => {
+					if(res.status === 400) {
+						Swal.fire({
+							title: "Trùng tên",
+							text: "Vui lòng thay đổi",
+							icon: "error"
+						});
+						return null;
+					} else if(res.status === 200) {
+						return res.json();
+					} else {
+						return null;
+					}
+				})
+				.then(data => {
+					if(data) {
+						Swal.fire({
+							title: "Thành công",
+							text: "Sửa thành công",
+							icon: "success"
+						});
+						tdName.text(name);
+					} 
+				})
+				.catch(err => {
+					Swal.fire({
+						title: "Thất bại",
+						text: "Không thành công",
+						icon: "error"
+					});
+				})
+			}
+		})
+		$('#categorySave').click(function() {
+			const name = $('#name').val();
+			if(name.trim() !== "") {
+				fetch('/category', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${jwt}`
+					},
+					body: JSON.stringify({ name })
+				})
+				.then(res => {
+					if(res.status === 400) {
+						Swal.fire({
+							title: "Trùng tên",
+							text: "Vui lòng thay đổi",
+							icon: "error"
+						});
+						return null;
+					} else if(res.status === 200) {
+						return res.json();
+					} else {
+						return null;
+					}
+				})
+				.then(data => {
+					if(data) {
+						Swal.fire({
+							title: "Thành công",
+							text: "Thêm thành công",
+							icon: "success"
+						});
+						let trLength = $('tbody tr').length;
+						let newIndex = 1;
+						if(trLength !== 0) {
+							newIndex = parseInt($('tbody tr').last().find('td').first().text()) + 1;
+						}
+						let newTr = `<tr>
+							<td class="border-bottom-0"><h6 class="fw-semibold mb-0">${newIndex}</h6></td>
+							<td class="border-bottom-0">
+								<h6 class="fw-semibold mb-0 fs-4 name-category">${data.name}</h6>
+							</td>
+							<td class="border-bottom-0">
+								<div class="d-flex align-items-center gap-2 justify-content-center">
+									<span class="badge bg-primary rounded-3 fw-semibold me-2 cursor-pointer btn-edit" data-id="${data._id}">Chỉnh sửa</span>
+									<span class="badge bg-danger rounded-3 fw-semibold cursor-pointer btn-remove" data-id="${data._id}">Xóa</span>
+								</div>
+							</td>
+						</tr>`;
+						$('tbody').append(newTr);
+					}
+
+				})
+				.catch(err => {
+					console.error(err);
+					Swal.fire({
+						title: "Lỗi",
+						text: "Thêm không thành công",
+						icon: "error"
+					});
+				})
+			} else {
+				Swal.fire({
+					title: "Thông tin còn thiếu",
+					text: "Vui lòng nhập đủ thông tin?",
+					icon: "question"
+				});
+			}
+		})
+		$('tbody').on('click', '.btn-edit', function() {
+			const id = $(this).data('id');
+			idCategory = id;
+			$('#oldName').val($(this).closest('tr').find('.name-category').text());
+			tdName = $(this).closest('tr').find('.name-category');
+			$('#categoryModalEdit').modal('show');
+		})
+
+		$('tbody').on('click', '.btn-remove', function() {
+			const id = $(this).data('id');
+			const name = $(this).closest('tr').find('.name-category').text();
+			const tr = $(this).closest('tr');
+			const swalWithBootstrapButtons = Swal.mixin({
+				customClass: {
+					confirmButton: "btn btn-success me-3",
+					cancelButton: "btn btn-danger"
+				},
+				buttonsStyling: false
+			});
+			swalWithBootstrapButtons.fire({
+				title: `Bạn có chắc xóa loại ${name}?`,
+				text: "Thao tác sẽ không thể hoàn tác!",
+				icon: "warning",
+				showCancelButton: true,
+				confirmButtonText: "Xóa!",
+				cancelButtonText: "Hủy!",
+			}).then((result) => {
+				if (result.isConfirmed) {
+					fetch(`/category/${id}`, {
+						method: 'DELETE',
+						headers: {
+							'Authorization': `Bearer ${jwt}`
+						},
+					})
+					.then(res => {
+						if(res.status === 204) {
+							swalWithBootstrapButtons.fire({
+								title: "Thành công!",
+								text: "Đã xóa thành công.",
+								icon: "success"
+							});
+							tr.remove();
+						} else if(res.status === 400) {
+							swalWithBootstrapButtons.fire({
+								title: "Thất bại!",
+								text: "Có sản phẩm thuộc loại này",
+								icon: "warning"
+							});
+						} else {
+							swalWithBootstrapButtons.fire({
+								title: "Thất bại!",
+								text: "Đã có lỗi xảy ra",
+								icon: "error"
+							});
+						}
+					})
+				}
+			});
+		})
+	})
+</script>

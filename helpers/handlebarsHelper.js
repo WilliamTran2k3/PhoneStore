@@ -28,5 +28,8 @@ module.exports = {
 	},
 	formatMoney: function(money) {
 		return money.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+	},
+	increaseOne: function(num) {
+		return num + 1;
 	}
 }

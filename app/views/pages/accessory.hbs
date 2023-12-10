@@ -13,7 +13,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
 	<div class="d-flex justify-content-start">
-		<button class="btn border me-2 btn-success btn-filter">Tất cả</button>
+		<button class="btn border me-2 btn-success btn-filter" data-id="-1">Tất cả</button>
 		{{#each category}}
 			<button class="btn border me-2 btn-filter" data-id="{{_id}}">{{name}}</button>
 		{{/each}}
@@ -189,9 +189,10 @@
 			$("#nextBtn").prop("disabled", true);
 		}
 		let currentPage = 1;
+		var category = -1;
 		$("#nextBtn").click(function() {
             currentPage++;
-            fetch(`/product/page/${currentPage}?accessory=true`)
+            fetch(`/product/page/${currentPage}/${category}/?accessory=true`)
             .then(res => res.json())
             .then(data => {
                 renderPhone(data.phones);
@@ -208,7 +209,7 @@
 
         $("#prevBtn").click(function() {
             currentPage--;
-            fetch(`/product/page/${currentPage}`)
+            fetch(`/product/page/${currentPage}/${category}/?accessory=true`)
             .then(res => res.json())
             .then(data => {
                 renderPhone(data.phones);
@@ -227,13 +228,28 @@
 			$('.btn-filter').removeClass('btn-success');
 			$(this).addClass('btn-success');
 			const idCategory = $(this).data('id');
-			fetch(`/product/filterByCategory/${idCategory}/?accessory=true`, {
+			category = idCategory;
+			fetch(`/product/page/${currentPage}/${category}/?accessory=true`, {
 				headers: {
 					'Authorization': `Bearer ${jwt}`
 				}
 			})
 				.then(res => res.json())
-				.then(data => renderPhone(data))
+				.then(data => {
+					renderPhone(data.phones);
+					currentPage = data.page;
+					$("#curPage").text(currentPage);
+					$("#pageNum").text(data.pageNum);
+					$("#prevBtn").prop("disabled", false);
+					$("#nextBtn").prop("disabled", false);
+
+					if (currentPage == 1) {
+						$("#prevBtn").prop("disabled", true);
+					}
+					if(currentPage == data.pageNum) {
+						$("#nextBtn").prop("disabled", true);
+					}
+				})
 				.catch(err => {
 					console.error(err);
 					Swal.fire({
@@ -242,11 +258,12 @@
 						icon: "error"
 					});
 				})
+			
 		})
 
 		$('.btn-save-acessory').click(function() {
 			const name = $('#name').val();
-			const category = $('.category').val();
+			const idcategory = $('.category').val();
 			const formData = new FormData();
 			const file = $('.image-phone')[0].files[0];
 			const imageName = Date.now() + '-' + Math.round(Math.random() * 1E9) + '.' + getFileExtension(file.name); 
@@ -257,7 +274,7 @@
 			});
 			formData.append('type', 'product');
 			formData.append('name', name);
-			formData.append('category', category);
+			formData.append('category', idcategory);
 			formData.append('price', price);
 			formData.append('retailPrice', retailPrice);
 			formData.append('files', image); // Thêm file vào FormData
@@ -279,7 +296,7 @@
 						text: "Thêm phụ kiện mới thành công",
 						icon: "success"
 					});
-					fetch(`/product/page/${currentPage}?accessory=true`, {
+					fetch(`/product/page/${currentPage}/${category}?accessory=true`, {
 						headers: {
 							'Authorization': `Bearer ${jwt}`
 						}
@@ -289,16 +306,17 @@
 						currentPage = data.page;
 						$("#curPage").text(currentPage);
 						$("#pageNum").text(data.pageNum);
-						
-						if(currentPage === 1) {
+						$("#prevBtn").prop("disabled", false);
+						$("#nextBtn").prop("disabled", false);
+						if(currentPage == 1) {
 							$("#prevBtn").prop("disabled", true);
-						} else {
-							$("#prevBtn").prop("disabled", false);
 						}
-						if (currentPage === data.pageNum) {
+						if (currentPage == data.pageNum) {
 							$("#nextBtn").prop("disabled", true);
 						}
 						renderPhone(data.phones);
+						$('#addAccessory').modal('hide');
+						$('#form-new-phone').trigger('reset');
 					})
 				})
 				.catch(err => {
@@ -312,12 +330,11 @@
 		})
 		var idPhone = null;
 		$('.container-accessories').on('click', '.edit-phone', function() {
+			
 			idPhone = $(this).closest('.accessory-item').data('id');
 			const name = $(this).closest('.accessory-item').find('.text-name-accessory').first().text();
+
 			const category = $(this).closest('.accessory-item').data('category');
-			const color = $(this).closest('.accessory-item').find('.text-color-accessory').first().text();
-			const ram = $(this).closest('.accessory-item').find('.text-ram-accessory').first().text();
-			const rom = $(this).closest('.accessory-item').find('.text-rom-accessory').first().text();
 			const price = removeCurrencyFormatting($(this).closest('.accessory-item')
 								.find('.text-price-accessory').first().text());
 			const retailPrice = removeCurrencyFormatting($(this).closest('.accessory-item')
@@ -331,7 +348,7 @@
 
 		$('.btn-edit').click(function() {
 			const name = $('#name-edit').val();
-			const category = $('.category-edit').val(); 
+			const idcategory = $('.category-edit').val(); 
 			const price = removeDotFormatting($('.price-phone-edit').val());
 			const retailPrice = removeDotFormatting($('.retail-price-phone-edit').val());
 			var imageName = null;
@@ -346,7 +363,7 @@
 			const formData = new FormData();
 			formData.append('type', 'product');
 			formData.append('name', name);
-			formData.append('category', category);
+			formData.append('category', idcategory);
 			formData.append('price', price);
 			formData.append('retailPrice', retailPrice);
 			if(imageName !== null) {
@@ -365,12 +382,13 @@
 					return res.json();
 				})
 				.then(data => {
+					$('#editAccessory').modal('hide');
 					Swal.fire({
 						title: "Thành công",
 						text: "Thay đổi thông tin phụ kiện thành công",
 						icon: "success"
 					});
-					fetch(`/product/page/${currentPage}/?accessory=true`, {
+					fetch(`/product/page/${currentPage}/${category}/?accessory=true`, {
 						headers: {
 							'Authorization': `Bearer ${jwt}`
 						}
@@ -380,12 +398,12 @@
 						currentPage = data.page;
 						$("#curPage").text(currentPage);
 						$("#pageNum").text(data.pageNum);
+						$("#prevBtn").prop("disabled", false);
+						$("#nextBtn").prop("disabled", false);
 						
 						if(currentPage == 1) {
 							$("#prevBtn").prop("disabled", true);
-						} else {
-							$("#prevBtn").prop("disabled", false);
-						}
+						} 
 						if (currentPage == data.pageNum) {
 							$("#nextBtn").prop("disabled", true);
 						}
@@ -568,10 +586,10 @@
 						</figure>
 						<div class="block-4-text px-3 pb-3 text-start">
 							<h3 class="mb-3 w-100">
-								<a href="#"><span class="text-name-phone">${phone.name}</span></a>
+								<a href="#"><span class="text-name-accessory">${phone.name}</span></a>
 							</h3>
-								<p class="text-primary font-weight-bold mb-1">Giá gốc: <span class="text-danger text-price-phone">${price}</span></p>
-							<p class="text-primary font-weight-bold">Giá bán: <span class="text-warning text-retail-price-phone">${retailPrice}</span></p>
+								<p class="text-primary font-weight-bold mb-1">Giá gốc: <span class="text-danger text-price-accessory">${price}</span></p>
+							<p class="text-primary font-weight-bold">Giá bán: <span class="text-warning text-retail-price-accessory">${retailPrice}</span></p>
 						</div>
 						${editRemoveBtns}
 					</div>

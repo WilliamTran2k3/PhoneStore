@@ -6,27 +6,38 @@
     </div>
     <div class="col-8 pe-5">
         {{!-- <h2>{{staff.fullname}}</h2> --}}
-        <table class="table align-middle">
-            <tr>
-                <th scope="row">Họ tên</th>
-                <td>{{staff.fullname}}</td>
-            </tr>
-            <tr>
-                <th scope="row">Email</th>
-                <td>
-                    {{staff.email}}
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">Tên đăng nhập</th>
-                <td>{{staff.username}}</td>
-            </tr>
-        </table>
+        <div class="card p-3">
+            <table class="table align-middle">
+                <tr>
+                    <th scope="row">Họ tên</th>
+                    <td>{{staff.fullname}}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Email</th>
+                    <td>
+                        {{staff.email}}
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Tên đăng nhập</th>
+                    <td>{{staff.username}}</td>
+                </tr>
+            </table>
+        </div>
+        
     </div>
 </div>
 <div class="px-5">
-    <h3 class="mb-4">Lịch sử bán hàng</h3>
-    <div class="orders-container">
+    <div class="d-flex align-items-center justify-content-between gap-5 mb-4">
+        <h3>Lịch sử bán hàng</h3>
+        <div class="d-flex gap-2 align-items-center justify-content-center">
+            <button type="button" class="btn btn-info" id="prevBtn" disabled><i class="ti ti-chevron-left"></i></button>
+            <div class="border p-2 text-center" style="width: 80px;"><span id="curPage">1</span>/<span id="pageNum">{{pageNum}}</span></div>
+            <button type="button" class="btn btn-info" id="nextBtn"><i class="ti ti-chevron-right"></i></button>
+        </div>
+    </div>
+    
+    <div class="order-container">
         {{#each orders}}
         <div class="card p-3 flex-row">
             <div class="col-4 border-end">
@@ -59,11 +70,19 @@
                             </thead>
                             <tbody>
                                 {{#each orderDetails}}
+                                {{#ifEquals product.isPhone true}}
                                 <tr>
-                                    <td>{{phone.name}} {{phone.color}} {{phone.ram}}GB {{phone.rom}}GB</td>
+                                    <td>{{product.name}} {{product.color}} {{product.ram}}GB {{product.rom}}GB</td>
                                     <td>{{formatMoney price}}</td>
                                     <td class="text-end">{{quantity}}</td>
                                 </tr>
+                                {{else}}
+                                <tr>
+                                    <td>{{product.name}} {{product.color}}</td>
+                                    <td>{{formatMoney price}}</td>
+                                    <td class="text-end">{{quantity}}</td>
+                                </tr>
+                                {{/ifEquals}}
                                 {{/each}}
                             </tbody>
                         </table>
@@ -90,3 +109,159 @@
         {{/each}}
     </div>
 </div>
+
+<script>
+    var currentPage = 1;
+
+    if ({{pageNum}} == 1) {
+        $("#nextBtn").prop("disabled", true);
+    }
+
+    $(function() {
+        $("#nextBtn").click(function() {
+            const id = '{{staff._id}}'
+            currentPage++;
+            fetch(`/account/order/${id}/page/${currentPage}`)
+            .then(res => res.json())
+            .then(data => {
+                $(".order-container").empty();
+                for (const order of data.orders) {
+                    $(".order-container").append(orderRow(order));
+                }
+                currentPage = data.page;
+                $("#curPage").text(currentPage);
+                $("#pageNum").text(data.pageNum);
+                $("#prevBtn").prop("disabled", false);
+                if (currentPage == data.pageNum) {
+                    $(this).prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+
+        $("#prevBtn").click(function() {
+            const id = '{{staff._id}}'
+            currentPage--;
+            fetch(`/account/order/${id}/page/${currentPage}`)
+            .then(res => res.json())
+            .then(data => {
+                $(".order-container").empty();
+                for (const order of data.orders) {
+                    $(".order-container").append(orderRow(order));
+                }
+                currentPage = data.page;
+                $("#curPage").text(currentPage);
+                $("#pageNum").text(data.pageNum);
+                $("#nextBtn").prop("disabled", false);
+                if (currentPage == 1) {
+                    $("#prevBtn").prop("disabled", true);
+                }
+            })
+            .catch(err => console.log(err));
+        });
+    });
+
+    function orderRow(data) {
+        let orderDetail = '';
+        for (const detail of data.orderDetails) {
+            if (detail.product.isPhone) {
+                orderDetail += `
+                    <tr>
+                        <td>${detail.product.name} ${detail.product.color} ${detail.product.ram}GB ${detail.product.rom}GB</td>
+                        <td>${formatMoney(detail.price)}</td>
+                        <td class="text-end">${detail.quantity}</td>
+                    </tr>
+                `;
+            } else {
+                orderDetail += `
+                    <tr>
+                        <td>${detail.product.name} ${detail.product.color}</td>
+                        <td>${formatMoney(detail.price)}</td>
+                        <td class="text-end">${detail.quantity}</td>
+                    </tr>
+                `;
+            }
+        };
+        return `
+            <div class="card p-3 flex-row">
+                <div class="col-4 border-end">
+                    <div class="fw-bold">Khách hàng</div>
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0px 10px;">
+                        <tr>
+                            <th>Tên</th><td>${data.customer.name}</td>
+                        </tr>
+                        <tr>
+                            <th>SĐT</th><td>${data.customer.phone}</td>
+                        </tr>
+                        <tr>
+                            <th>Địa chỉ</th><td>${data.customer.address}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-8">
+                    <table style="border-collapse: separate; border-spacing: 10px 5px;">
+                        <tr>
+                            <th>Ngày lập:</th><td>${annoucementDateFormat(data.dateCheckout)}</td>
+                        </tr>
+                        <tr>
+                            <table class="ps-2" style="width: 100%; border-collapse: separate; border-spacing: 0px 10px;">
+                                <thead>
+                                    <tr>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Giá</th>
+                                        <th class="text-end">Số lượng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${orderDetail}
+                                </tbody>
+                            </table>
+                        </tr>
+                    </table>
+                    <div class="row justify-content-end">
+                        <div class="col-4">
+                            <table class="float-right" style="width: 100%;; border-collapse: separate; border-spacing: 0px 5px;">
+                                <tr>
+                                    <th>Tổng cộng</th><td class="text-end">${formatMoney(data.total)}</td>
+                                </tr>
+                                <tr>
+                                    <th>Tiền đưa</th><td class="text-end">${formatMoney(data.moneyGiven)}</td>
+                                </tr>
+                                <tr>
+                                    <th>Tiền thối</th><td class="text-end">${formatMoney(data.moneyBack)}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function formatMoney(money) {
+		return money.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+	}
+
+    function annoucementDateFormat(dateStr) {
+		const date = new Date(dateStr);
+		const year = date.getFullYear();
+		let month = date.getMonth() + 1;
+		if (month < 10) {
+			month = '0' + month;
+		}
+		let day = date.getDate();
+		if (day < 10) {
+			day = '0' + day;
+		}
+		let hour = date.getHours();
+		if (hour < 10) {
+			hour = '0' + hour;
+		}
+		let minute = date.getMinutes();
+		if (minute < 10) {
+			minute = '0' + minute;
+		}
+		return `${day}/${month}/${year} - ${hour}:${minute}`;
+	}
+</script>

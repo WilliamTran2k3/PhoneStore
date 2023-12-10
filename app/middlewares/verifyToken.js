@@ -70,8 +70,38 @@ const verifyToken = async (req, res, next) => {
 	}
 };
 
+const verifyTokenAdmin = async (req, res, next) => {
+	try {
+		let token = req.cookies.jwt;
+
+		if (!token) {
+			// return res.status(403).send("Access Denied");
+			return res.redirect('/login');
+		}
+		const verified = jwt.verify(token, process.env.JWT_SECRET);
+		req.user = verified;
+		const user = await User.findById(verified.userId);
+		if (user.role != ROLES.Admin) {
+			// req.session.destroy((err) => {
+			// 	if (err) {
+			// 		console.error('Lỗi khi xóa session: ' + err);
+			// 	}
+			// });
+			// res.clearCookie('jwt');
+			return res.redirect('/');
+		}
+		const userObj = user.toObject();
+		delete userObj.password;
+		req.session.user = userObj;
+		next();
+	} catch (err) {
+		return res.redirect('/login');
+	}
+};
+
 module.exports = {
 	verifyTokenAPIAdmin,
 	verifyTokenAPI,
-	verifyToken
+	verifyToken,
+	verifyTokenAdmin,
 };

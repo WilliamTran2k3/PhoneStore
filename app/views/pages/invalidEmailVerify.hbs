@@ -2,36 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coding Duo</title>
-    <link rel="shortcut icon" type="image/png" href="/images/logos/favicon.png" />
-    <link rel="stylesheet" href="/css/styles.min.css">
-    <script src="/libs/jquery/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hết hạn Email</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .alert-container {
+            width: 600px;
+            padding: 20px;
+            border: 1px solid #dc3545;
+            border-radius: 5px;
+            background-color: #f8d7da;
+        }
+        .alert-heading {
+            color: #721c24;
+        }
+        .alert p {
+            margin-bottom: 10px;
+        }
+        .mb-0 {
+            margin-bottom: 0;
+        }
+    </style>
 </head>
 <body>
-  <!--  Body Wrapper -->
-  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
-    data-sidebar-position="fixed" data-header-position="fixed">
-    <div
-      class="position-relative overflow-hidden radial-gradient min-vh-100 d-flex align-items-center justify-content-center">
-      <div class="d-flex align-items-center justify-content-center w-100">
-        <div class="row justify-content-center w-100">
-          <div class="col-md-8 col-lg-3 col-xxl-3">
-            <div class="card mb-0">
-              <div class="card-body">
-                <a href="/" class="text-nowrap logo-img text-center d-block py-3 w-100">
-                  <img src="/images/logos/brand.svg" width="180" alt="">
-                </a>
-                <div>Link đăng nhập đã hết hạn</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+
+<div class="alert-container">
+    <div class="alert">
+        <h4 class="alert-heading" style="color: #721c24;">Link Xác Thực Email Đã Hết Hạn!</h4>
+        <p>Xin lỗi, link xác thực email của bạn đã hết hạn sử dụng.</p>
+        <p>Vui lòng liên hệ với Admin để có thể nhận lại Email xác thực.</p>
     </div>
-  </div>
-  <script src="/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+
 </body>
 </html>

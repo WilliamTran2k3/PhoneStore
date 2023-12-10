@@ -13,7 +13,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
 	<div class="d-flex justify-content-start">
-		<button class="btn border me-2 btn-success btn-filter">Tất cả</button>
+		<button class="btn border me-2 btn-success btn-filter" data-id="-1">Tất cả</button>
 		{{#each category}}
 			<button class="btn border me-2 btn-filter" data-id="{{_id}}">{{name}}</button>
 		{{/each}}
@@ -37,7 +37,17 @@
 			</figure>
 			<div class="block-4-text px-3 pb-3 text-start">
 				<h3 class="mb-3 w-100" >
-					<a href="#"><span class="text-name-phone">{{name}}</span> <span class="text-color-phone">{{color}}</span> <span class="text-ram-phone">{{ram}}</span>GB <span class="text-rom-phone">{{rom}}</span>GB</a>
+					<a href="#"><span class="text-name-phone">{{name}}</span> 
+						{{#if color}} 
+							<span class="text-color-phone">{{color}}</span> 
+						{{/if}}
+						{{#if ram}}
+								<span class="text-ram-phone">{{ram}}</span>GB 
+						{{/if}}
+						{{#if rom}}
+							<span class="text-rom-phone">{{rom}}</span>GB
+						{{/if}}
+					</a>
 				</h3>
 				{{#ifEquals ../user.role 'ROLE ADMIN'}}
 					<p class="text-primary font-weight-bold mb-1">Giá gốc: <span class="text-danger text-price-phone">{{formatMoney price}}</span></p>
@@ -251,13 +261,14 @@
 	$(function () {
 		var role = '{{user.role}}';
 		const jwt = getCookie('jwt');
+		var category = -1;
 		if ({{pageNum}} == 1) {
 			$("#nextBtn").prop("disabled", true);
 		}
 		let currentPage = 1;
 		$("#nextBtn").click(function() {
             currentPage++;
-            fetch(`/product/page/${currentPage}`)
+            fetch(`/product/page/${currentPage}/${category}`)
             .then(res => res.json())
             .then(data => {
                 renderPhone(data.phones);
@@ -274,7 +285,7 @@
 
         $("#prevBtn").click(function() {
             currentPage--;
-            fetch(`/product/page/${currentPage}`)
+            fetch(`/product/page/${currentPage}/${category}`)
             .then(res => res.json())
             .then(data => {
                 renderPhone(data.phones);
@@ -290,16 +301,34 @@
         });
 
 		$('.btn-filter').click(function() {
+			currentPage = 1;
 			$('.btn-filter').removeClass('btn-success');
 			$(this).addClass('btn-success');
 			const idCategory = $(this).data('id');
-			fetch(`/product/filterByCategory/${idCategory}`, {
+			category = idCategory;
+			/*fetch(`/product/filterByCategory/${idCategory}`, {
+				headers: {
+					'Authorization': `Bearer ${jwt}`
+				}
+			})*/
+			fetch(`/product/page/${currentPage}/${category}`, {
 				headers: {
 					'Authorization': `Bearer ${jwt}`
 				}
 			})
 				.then(res => res.json())
-				.then(data => renderPhone(data))
+				.then(data => {
+					console.log(data.page)
+					renderPhone(data.phones);
+					currentPage = data.page;
+					$("#curPage").text(currentPage);
+					$("#pageNum").text(data.pageNum);
+					$("#prevBtn").prop("disabled", true);
+					$("#nextBtn").prop("disabled", false);
+					if(currentPage == data.pageNum) {
+						$("#nextBtn").prop("disabled", true);
+					}
+				})
 				.catch(err => {
 					console.error(err);
 					Swal.fire({
@@ -368,7 +397,7 @@
 		})
 		$('.btn-save').click(function() {
 			const name = $('#name').val();
-			const category = $('.category').val();
+			const idcategory = $('.category').val();
 			const formData = new FormData();
 			formData.append('type', 'product');
 			console.log($('.new-varient').length)
@@ -387,7 +416,7 @@
 					type: file.type,
 				});
 				phones.push({
-					name, category, color, ram, rom, price, retailPrice, image: imageName
+					name, category: idcategory, color, ram, rom, price, retailPrice, image: imageName
 				});
         		formData.append('files', image); // Thêm file vào FormData
 			})
@@ -409,7 +438,7 @@
 						text: "Thêm điện thoại mới thành công",
 						icon: "success"
 					});
-					fetch(`/product/page/${currentPage}`, {
+					fetch(`/product/page/${currentPage}/${category}`, {
 						headers: {
 							'Authorization': `Bearer ${jwt}`
 						}
@@ -419,16 +448,18 @@
 						currentPage = data.page;
 						$("#curPage").text(currentPage);
 						$("#pageNum").text(data.pageNum);
-						
+						$("#prevBtn").prop("disabled", false);
+						$("#nextBtn").prop("disabled", false);
 						if(currentPage === 1) {
 							$("#prevBtn").prop("disabled", true);
-						} else {
-							$("#prevBtn").prop("disabled", false);
-						}
+						} 
 						if (currentPage === data.pageNum) {
 							$("#nextBtn").prop("disabled", true);
 						}
 						renderPhone(data.phones);
+						$('#form-new-phone').trigger('reset');
+						$('.new-varient.position-relative').remove();
+						$('#addPhone').modal('hide');
 					})
 				})
 				.catch(err => {
@@ -464,7 +495,7 @@
 
 		$('.btn-edit').click(function() {
 			const name = $('#name-edit').val();
-			const category = $('.category-edit').val(); 
+			const idcategory = $('.category-edit').val(); 
 			const color = $('.color-phone-edit').val();
 			const ram = $('.ram-edit').val();
 			const rom = $('.rom-edit').val();
@@ -482,7 +513,7 @@
 			const formData = new FormData();
 			formData.append('type', 'product');
 			formData.append('name', name);
-			formData.append('category', category);
+			formData.append('category', idcategory);
 			formData.append('color', color);
 			formData.append('ram', ram);
 			formData.append('rom', rom);
@@ -504,31 +535,34 @@
 					return res.json();
 				})
 				.then(data => {
+					$('#editPhone').modal('hide');
 					Swal.fire({
 						title: "Thành công",
 						text: "Thay đổi thông tin điện thoại thành công",
 						icon: "success"
 					});
-					fetch(`/product/page/${currentPage}`, {
+					fetch(`/product/page/${currentPage}/${category}`, {
 						headers: {
 							'Authorization': `Bearer ${jwt}`
 						}
 					})
 					.then(res => res.json())
 					.then(data => {
+						console.log(data)
 						currentPage = data.page;
 						$("#curPage").text(currentPage);
 						$("#pageNum").text(data.pageNum);
-						
+						$("#prevBtn").prop("disabled", false);
+						$("#nextBtn").prop("disabled", false);
+						console.log(currentPage)
 						if(currentPage == 1) {
 							$("#prevBtn").prop("disabled", true);
-						} else {
-							$("#prevBtn").prop("disabled", false);
-						}
+						} 
 						if (currentPage == data.pageNum) {
 							$("#nextBtn").prop("disabled", true);
 						}
 						renderPhone(data.phones);
+
 					})
 				})
 				.catch(err => {
@@ -574,7 +608,7 @@
 								text: "Đã xóa thành công",
 								icon: "success"
 							});
-							fetch(`/product/page/${currentPage}`, {
+							fetch(`/product/page/${currentPage}/${category}`, {
 								headers: {
 									'Authorization': `Bearer ${jwt}`
 								}
@@ -584,12 +618,11 @@
 								currentPage = data.page;
 								$("#curPage").text(currentPage);
 								$("#pageNum").text(data.pageNum);
-								
+								$("#prevBtn").prop("disabled", false);
+								$("#nextBtn").prop("disabled", false);
 								if(currentPage == 1) {
 									$("#prevBtn").prop("disabled", true);
-								} else {
-									$("#prevBtn").prop("disabled", false);
-								}
+								} 
 								if (currentPage == data.pageNum) {
 									$("#nextBtn").prop("disabled", true);
 								}
@@ -696,6 +729,9 @@
 				}
 				const price = phone.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
 				const retailPrice = phone.retailPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+				const ram = phone.ram ? `${phone.ram} GB` : ''; 
+				const rom = phone.rom ? `${phone.rom} GB` : ''; 
+				const color = phone.color ? phone.color : ''; 
 				phonesHtml += `
 				<div class="col-sm-6 col-lg-3 mb-4 aos-init aos-animate" data-aos="fade-up">
 					<div class="block-4 text-center border shadow-lg position-relative phone-item" data-id="${phone._id}" data-category="${phone.category}">
@@ -706,7 +742,7 @@
 						</figure>
 						<div class="block-4-text px-3 pb-3 text-start">
 							<h3 class="mb-3 w-100">
-								<a href="#"><span class="text-name-phone">${phone.name}</span> <span class="text-color-phone">${phone.color}</span> <span class="text-ram-phone">${phone.ram}</span>GB <span class="text-rom-phone">${phone.rom}</span>GB</a>
+								<a href="#"><span class="text-name-phone">${phone.name}</span> <span class="text-color-phone">${color}</span> <span class="text-ram-phone">${ram}</span> <span class="text-rom-phone">${rom}</span></a>
 							</h3>
 								<p class="text-primary font-weight-bold mb-1">Giá gốc: <span class="text-danger text-price-phone">${price}</span></p>
 							<p class="text-primary font-weight-bold">Giá bán: <span class="text-warning text-retail-price-phone">${retailPrice}</span></p>

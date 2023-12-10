@@ -13,6 +13,7 @@ const jsPath = [
 	'public/libs/simplebar/dist/simplebar.js',
 	'public/js/app.min.js',
 	'public/js/sidebarmenu.js',
+	'public/js/header.js'
 ];
 const cssPath = [
 	'public/css/root.css',
