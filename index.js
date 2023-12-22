@@ -24,9 +24,7 @@ app.use(sessions({
 	saveUninitialized: true,
 	resave: false,
 	store: new MongoStore({
-		url: process.env.MONGO_URI,
-		ttl: 14 * 24 * 60 * 60,
-		autoRemove: 'native'
+		mongoUrl: process.env.MONGO_URI,
 	})
 }));
 app.use(cookieParser());
