@@ -220,7 +220,8 @@ class AccountController {
     async changeAvatar(req, res) {
         try {
             const file = req.file;
-            const user = req.session.user;
+            const userSession = req.session.user;
+            const user = await User.findById(userSession._id);
             console.log(user);
             console.log(file.filename);
             if (user.avatar != 'user.jpg') {

@@ -10,7 +10,7 @@ const storage = multer.diskStorage({
 		cb(null, uploadPath);
 	},
 	filename: function (req, file, cb) {
-		const userId = req.params.id;
+		const userId = req.session.user._id;
 		var filename = null;
 		if(req.body.type === 'profile') {
 			filename = `${userId}_${file.originalname}`;
