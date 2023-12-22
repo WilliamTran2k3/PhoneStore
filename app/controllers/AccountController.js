@@ -222,6 +222,8 @@ class AccountController {
             const userId = req.params.id;
             const file = req.file;
             const user = await User.findById(userId);
+            console.log(user);
+            console.log(file.filename);
             if (user.avatar != 'user.jpg') {
                 const folderPath = path.join(__dirname, '..', '..', '/public/images/profile');
                 const filePath = path.join(folderPath, user.avatar);
