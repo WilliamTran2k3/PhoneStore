@@ -11,7 +11,7 @@ const cookieParser = require("cookie-parser");
 const sessions = require('express-session');
 const route = require('./routes');
 const { seedDB } = require('./app/utils/seed');
-const MongoStore = require('connect-mongo')(sessions);
+const MongoStore = require('connect-mongo');
 
 dotenv.config();
 const app = express();
