@@ -11,7 +11,6 @@ const cookieParser = require("cookie-parser");
 const sessions = require('express-session');
 const route = require('./routes');
 const { seedDB } = require('./app/utils/seed');
-const MongoStore = require('connect-mongo');
 
 dotenv.config();
 const app = express();
@@ -23,11 +22,6 @@ app.use(sessions({
 	secret: "lagicungduoc",
 	saveUninitialized: true,
 	resave: false,
-	store: new MongoStore({ mongoUrl: process.env.MONGO_URI }),
-	cookie: { 
-		maxAge: 1000 * 60 * 60 * 24,
-		secure: true
-	},
 }));
 app.use(cookieParser());
 app.use(cors());
