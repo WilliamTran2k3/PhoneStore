@@ -23,7 +23,8 @@ app.use(sessions({
 	secret: "lagicungduoc",
 	saveUninitialized: true,
 	resave: false,
-	store: MongoStore.create({ mongoUrl: process.env.MONGODUL_URL })
+	store: new MongoStore({ mongoUrl: process.env.MONGODUL_URL }),
+	cookie: { maxAge: 1000 * 60 * 60 * 24 },
 }));
 app.use(cookieParser());
 app.use(cors());
