@@ -23,7 +23,7 @@ app.use(sessions({
 	secret: "lagicungduoc",
 	saveUninitialized: true,
 	resave: false,
-	store: MongoStore.create({ mongoUrl: 'mongodb://localhost/test-app' })
+	store: MongoStore.create({ mongoUrl: process.env.MONGODUL_URL })
 }));
 app.use(cookieParser());
 app.use(cors());
