@@ -8,7 +8,7 @@ const path = require("path");
 const { fileURLToPath } = require("url");
 const exphbs = require("express-handlebars");
 const cookieParser = require("cookie-parser");
-const sessions = require('cookie-session');
+const sessions = require('express-session');
 const route = require('./routes');
 const { seedDB } = require('./app/utils/seed');
 const MongoStore = require('connect-mongo');
@@ -23,6 +23,7 @@ app.use(sessions({
 	secret: "lagicungduoc",
 	saveUninitialized: true,
 	resave: false,
+	store: MongoStore.create({ mongoUrl: 'mongodb://localhost/test-app' })
 }));
 app.use(cookieParser());
 app.use(cors());
