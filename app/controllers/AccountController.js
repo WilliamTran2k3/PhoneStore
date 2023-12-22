@@ -231,6 +231,7 @@ class AccountController {
             await user.save();
             return res.status(200).json({ success: file.filename });
         } catch (err) {
+            console.error(err);
             return res.status(200).json({ error: err });
         }
     }
