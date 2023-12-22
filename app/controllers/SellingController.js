@@ -138,7 +138,13 @@ class SellingController {
 				},
 				path: filePath
 			};
-			pdf.create(document)
+			pdf.create(document, {
+				childProcessOptions: {
+					env: {
+						OPENSSL_CONF: '/dev/null',
+					},
+				}
+			})
 				.then(result => {
 					
 
