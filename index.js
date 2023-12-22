@@ -24,7 +24,10 @@ app.use(sessions({
 	saveUninitialized: true,
 	resave: false,
 	store: new MongoStore({ mongoUrl: process.env.MONGO_URI }),
-	cookie: { maxAge: 1000 * 60 * 60 * 24 },
+	cookie: { 
+		maxAge: 1000 * 60 * 60 * 24,
+		secure: true
+	},
 }));
 app.use(cookieParser());
 app.use(cors());
